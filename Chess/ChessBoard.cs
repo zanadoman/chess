@@ -28,14 +28,14 @@ public class ChessBoard : Grid
             {
                 Button button = new Button();
                 button.Background = ((int)rank + (int)file) % 2 == 0
-                    ? new SolidColorBrush(Color.FromRgb(227, 193, 111))
-                    : new SolidColorBrush(Color.FromRgb(184, 139, 74));
+                    ? new SolidColorBrush(Color.FromRgb(184, 139, 74))
+                    : new SolidColorBrush(Color.FromRgb(227, 193, 111));
                 button.BorderBrush = Brushes.White;
                 button.BorderThickness = new Thickness(0);
                 button.MouseEnter += OnMouseEnter;
                 button.MouseLeave += OnMouseLeave;
                 button.Click += OnClick;
-                SetRow(button, (int)rank);
+                SetRow(button, (int)Rank.Eighth - (int)rank);
                 SetColumn(button, (int)file);
                 Children.Add(button);
                 Square square = new Square(file, rank);
@@ -87,48 +87,54 @@ public class ChessBoard : Grid
                 _gameBoard.MakeMove(move, false);
                 UpdateSquare(_selectedSquare);
                 UpdateSquare(square);
+                if (_gameBoard[square] is King && 1 < Math.Abs((int)square.File - (int)_selectedSquare.File))
+                {
+                    UpdateSquare(new Square(File.A, _selectedSquare.Rank));
+                    UpdateSquare(new Square(File.D, _selectedSquare.Rank));
+                    UpdateSquare(new Square(File.F, _selectedSquare.Rank));
+                    UpdateSquare(new Square(File.H, _selectedSquare.Rank));
+                }
+                MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
             }
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
             ((Button)button).BorderThickness = new Thickness(0);
             _selectedSquare = null;
-            MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
         }
     }
 
     private void UpdateSquare(Square square)
     {
-        Piece piece = _gameBoard.Board[(int)square.Rank, (int)square.File];
-        if (piece is Pawn pawn)
+        if (_gameBoard[square] is Pawn pawn)
         {
             _squares[square].Content = pawn.Owner == Player.White
                 ? Chess.Resources.WhitePawn
                 : Chess.Resources.BlackPawn;
         }
-        else if (piece is Knight knight)
+        else if (_gameBoard[square] is Knight knight)
         {
             _squares[square].Content = knight.Owner == Player.White
                 ? Chess.Resources.WhiteKnight
                 : Chess.Resources.BlackKnight;
         }
-        else if (piece is Bishop bishop)
+        else if (_gameBoard[square] is Bishop bishop)
         {
             _squares[square].Content = bishop.Owner == Player.White
                 ? Chess.Resources.WhiteBishop
                 : Chess.Resources.BlackBishop;
         }
-        else if (piece is King king)
+        else if (_gameBoard[square] is King king)
         {
             _squares[square].Content = king.Owner == Player.White
                 ? Chess.Resources.WhiteKing
                 : Chess.Resources.BlackKing;
         }
-        else if (piece is Rook rook)
+        else if (_gameBoard[square] is Rook rook)
         {
             _squares[square].Content = rook.Owner == Player.White
                 ? Chess.Resources.WhiteRook
                 : Chess.Resources.BlackRook;
         }
-        else if (piece is Queen queen)
+        else if (_gameBoard[square] is Queen queen)
         {
             _squares[square].Content = queen.Owner == Player.White
                 ? Chess.Resources.WhiteQueen
