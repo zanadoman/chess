@@ -15,9 +15,9 @@ public class ChessBoard : Grid
 {
     public ChessBoard()
     {
-        Width = 480;
-        Height = 480;
-        for (int i = 0; i < 8; i++)
+        Width = Application.Current.MainWindow.Width;
+        Height = Application.Current.MainWindow.Width;
+        foreach (Rank _ in Enum.GetValues(typeof(Rank)))
         {
             RowDefinitions.Add(new RowDefinition());
             ColumnDefinitions.Add(new ColumnDefinition());
@@ -41,6 +41,19 @@ public class ChessBoard : Grid
                 Square square = new Square(file, rank);
                 _squares.Add(square, button);
                 UpdateSquare(square);
+            }
+        }
+        MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
+    }
+
+    public void Restart()
+    {
+        _gameBoard = new GameBoard();
+        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        {
+            foreach (File file in Enum.GetValues(typeof(File)))
+            {
+                UpdateSquare(new Square(file, rank));
             }
         }
     }
@@ -72,12 +85,17 @@ public class ChessBoard : Grid
         Square square = _squares.Where(s => s.Value == button).Select(s => s.Key).First();
         if (_selectedSquare == null)
         {
-            Piece piece = _gameBoard.Board[(int)square.Rank, (int)square.File];
-            if (piece != null && piece.Owner == _gameBoard.WhoseTurn())
+            if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
             {
                 ((Button)button).BorderThickness = new Thickness(3);
                 _selectedSquare = square;
             }
+        }
+        else if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
+        {
+            _squares[_selectedSquare].BorderThickness = new Thickness(0);
+            ((Button)button).BorderThickness = new Thickness(3);
+            _selectedSquare = square;
         }
         else
         {
@@ -87,12 +105,18 @@ public class ChessBoard : Grid
                 _gameBoard.MakeMove(move, false);
                 UpdateSquare(_selectedSquare);
                 UpdateSquare(square);
-                if (_gameBoard[square] is King && 1 < Math.Abs((int)square.File - (int)_selectedSquare.File))
+                if (_gameBoard[square] is King)
                 {
-                    UpdateSquare(new Square(File.A, _selectedSquare.Rank));
-                    UpdateSquare(new Square(File.D, _selectedSquare.Rank));
-                    UpdateSquare(new Square(File.F, _selectedSquare.Rank));
-                    UpdateSquare(new Square(File.H, _selectedSquare.Rank));
+                    if ((int)_selectedSquare.File - (int)square.File == 2)
+                    {
+                        UpdateSquare(new Square(File.A, _selectedSquare.Rank));
+                        UpdateSquare(new Square(File.D, _selectedSquare.Rank));
+                    }
+                    else if ((int)square.File - (int)_selectedSquare.File == 2)
+                    {
+                        UpdateSquare(new Square(File.F, _selectedSquare.Rank));
+                        UpdateSquare(new Square(File.H, _selectedSquare.Rank));
+                    }
                 }
                 MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
             }

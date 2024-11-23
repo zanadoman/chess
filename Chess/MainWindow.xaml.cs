@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Chess;
 
@@ -11,21 +12,18 @@ public partial class MainWindow : Window
         WindowStyle = WindowStyle.None;
         ResizeMode = ResizeMode.NoResize;
         Width = 480;
-        Height = 560;
+        Height = 540;
         Title = "Chess";
+        Background = Brushes.SaddleBrown;
         Content = new StackPanel()
         {
             Children = { Menu, ChessBoard }
         };
     }
 
-    public static Menu Menu => _menu == null
-        ? _menu = new Menu()
-        : _menu;
+    public static Menu Menu => _menu ?? (_menu = new Menu());
 
-    public static ChessBoard ChessBoard => _chessBoard == null
-        ? _chessBoard = new ChessBoard()
-        : _chessBoard;
+    public static ChessBoard ChessBoard => _chessBoard ?? (_chessBoard = new ChessBoard());
 
     private static Menu? _menu = null;
     private static ChessBoard? _chessBoard = null;

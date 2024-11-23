@@ -7,6 +7,10 @@ namespace Chess;
 
 internal class Resources
 {
+    public static Image RestartIcon => LoadIcon("Restart.png");
+    public static Image MinimizeIcon => LoadIcon("Minimize.png");
+    public static Image QuitIcon => LoadIcon("Quit.png");
+
     public static Image WhitePawn => LoadPiece("WhitePawn.png");
     public static Image WhiteKnight => LoadPiece("WhiteKnight.png");
     public static Image WhiteBishop => LoadPiece("WhiteBishop.png");
@@ -21,30 +25,32 @@ internal class Resources
     public static Image BlackRook => LoadPiece("BlackRook.png");
     public static Image BlackQueen => LoadPiece("BlackQueen.png");
 
-    private static Image LoadPiece(string piece)
+    private static Image LoadIcon(string icon)
     {
-        BitmapImage bitmapImage = new BitmapImage();
-        bitmapImage.BeginInit();
-        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", piece));
-        bitmapImage.EndInit();
         return new Image()
         {
-            Source = bitmapImage,
+            Source = BitmapImage(icon),
+            Width = 40,
+            Height = 40
+        };
+    }
+
+    private static Image LoadPiece(string piece)
+    {
+        return new Image()
+        {
+            Source = BitmapImage(piece),
             Width = 55,
             Height = 55
         };
     }
 
-    private static Image? _whitePawn = null;
-    private static Image? _whiteKnight = null;
-    private static Image? _whiteBishop = null;
-    private static Image? _whiteKing = null;
-    private static Image? _whiteRook = null;
-    private static Image? _whiteQueen = null;
-    private static Image? _blackPawn = null;
-    private static Image? _blackKnight = null;
-    private static Image? _blackBishop = null;
-    private static Image? _blackKing = null;
-    private static Image? _blackRook = null;
-    private static Image? _blackQueen = null;
+    private static BitmapImage BitmapImage(string file)
+    {
+        BitmapImage bitmapImage = new BitmapImage();
+        bitmapImage.BeginInit();
+        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", file));
+        bitmapImage.EndInit();
+        return bitmapImage;
+    }
 }
