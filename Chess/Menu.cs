@@ -99,7 +99,7 @@ public class Menu : DockPanel
     private Label _label = new Label()
     {
         FontSize = 36,
-        Foreground = Brushes.WhiteSmoke,
+        Foreground = Brushes.White,
         VerticalAlignment = VerticalAlignment.Center
     };
 }

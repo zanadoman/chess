@@ -13,6 +13,9 @@ namespace Chess;
 
 public class ChessBoard : Grid
 {
+    private readonly SolidColorBrush LIGHT_TILE = new SolidColorBrush(Color.FromRgb(227, 193, 111));
+    private readonly SolidColorBrush DARK_TILE = new SolidColorBrush(Color.FromRgb(184, 139, 74));
+
     public ChessBoard()
     {
         Width = Application.Current.MainWindow.Width;
@@ -28,8 +31,8 @@ public class ChessBoard : Grid
             {
                 Button button = new Button();
                 button.Background = ((int)rank + (int)file) % 2 == 0
-                    ? new SolidColorBrush(Color.FromRgb(184, 139, 74))
-                    : new SolidColorBrush(Color.FromRgb(227, 193, 111));
+                    ? DARK_TILE
+                    : LIGHT_TILE;
                 button.BorderBrush = Brushes.White;
                 button.BorderThickness = new Thickness(0);
                 button.MouseEnter += OnMouseEnter;
@@ -89,13 +92,16 @@ public class ChessBoard : Grid
             {
                 ((Button)button).BorderThickness = new Thickness(3);
                 _selectedSquare = square;
+                ShowValidMoves(_selectedSquare);
             }
         }
         else if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
         {
+            ClearValidMoves();
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
             ((Button)button).BorderThickness = new Thickness(3);
             _selectedSquare = square;
+            ShowValidMoves(_selectedSquare);
         }
         else
         {
@@ -119,6 +125,7 @@ public class ChessBoard : Grid
                     }
                 }
                 MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
+                ClearValidMoves();
             }
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
             ((Button)button).BorderThickness = new Thickness(0);
@@ -167,6 +174,34 @@ public class ChessBoard : Grid
         else
         {
             _squares[square].Content = null;
+        }
+    }
+
+    private void ShowValidMoves(Square selectedSquare)
+    {
+        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        {
+            foreach (File file in Enum.GetValues(typeof(File)))
+            {
+                Square square = new Square(file, rank);
+                if (square.Equals(selectedSquare) ||
+                    _gameBoard.IsValidMove(new Move(selectedSquare, square, _gameBoard.WhoseTurn())))
+                {
+                    _squares[square].Background = ((int)square.Rank + (int)square.File) % 2 == 0
+                        ? Brushes.DimGray
+                        : Brushes.AntiqueWhite;
+                }
+            }
+        }
+    }
+
+    private void ClearValidMoves()
+    {
+        foreach (KeyValuePair<Square, Button> square in _squares)
+        {
+            square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
+                ? DARK_TILE
+                : LIGHT_TILE;
         }
     }
 
