@@ -1,56 +1,51 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 
 namespace Chess;
 
 internal class Resources
 {
-    public static Image RestartIcon => LoadIcon("Restart.png");
-    public static Image MinimizeIcon => LoadIcon("Minimize.png");
-    public static Image QuitIcon => LoadIcon("Quit.png");
+    public static BitmapImage RestartIcon => _restartIcon ?? (_restartIcon = LoadBitmapImage("Restart.png"));
+    public static BitmapImage MinimizeIcon => _minimizeIcon ?? (_minimizeIcon = LoadBitmapImage("Minimize.png"));
+    public static BitmapImage QuitIcon => _quitIcon ?? (_quitIcon = LoadBitmapImage("Quit.png"));
 
-    public static Image WhitePawn => LoadPiece("WhitePawn.png");
-    public static Image WhiteKnight => LoadPiece("WhiteKnight.png");
-    public static Image WhiteBishop => LoadPiece("WhiteBishop.png");
-    public static Image WhiteKing => LoadPiece("WhiteKing.png");
-    public static Image WhiteRook => LoadPiece("WhiteRook.png");
-    public static Image WhiteQueen => LoadPiece("WhiteQueen.png");
+    public static BitmapImage WhitePawn => _whitePawn ?? (_whitePawn = LoadBitmapImage("WhitePawn.png"));
+    public static BitmapImage WhiteKnight => _whiteKing ?? (_whiteKnight = LoadBitmapImage("WhiteKnight.png"));
+    public static BitmapImage WhiteBishop => _whiteBishop ?? (_whiteBishop = LoadBitmapImage("WhiteBishop.png"));
+    public static BitmapImage WhiteKing => _whiteKing ?? (_whiteKing = LoadBitmapImage("WhiteKing.png"));
+    public static BitmapImage WhiteRook => _whiteRook ?? (_whiteRook = LoadBitmapImage("WhiteRook.png"));
+    public static BitmapImage WhiteQueen => _whiteQueen ?? (_whiteQueen = LoadBitmapImage("WhiteQueen.png"));
 
-    public static Image BlackPawn => LoadPiece("BlackPawn.png");
-    public static Image BlackKnight => LoadPiece("BlackKnight.png");
-    public static Image BlackBishop => LoadPiece("BlackBishop.png");
-    public static Image BlackKing => LoadPiece("BlackKing.png");
-    public static Image BlackRook => LoadPiece("BlackRook.png");
-    public static Image BlackQueen => LoadPiece("BlackQueen.png");
+    public static BitmapImage BlackPawn => _blackPawn ?? (_blackPawn = LoadBitmapImage("BlackPawn.png"));
+    public static BitmapImage BlackKnight => _blackKing ?? (_blackKnight = LoadBitmapImage("BlackKnight.png"));
+    public static BitmapImage BlackBishop => _blackBishop ?? (_blackBishop = LoadBitmapImage("BlackBishop.png"));
+    public static BitmapImage BlackKing => _blackKing ?? (_blackKing = LoadBitmapImage("BlackKing.png"));
+    public static BitmapImage BlackRook => _blackRook ?? (_blackRook = LoadBitmapImage("BlackRook.png"));
+    public static BitmapImage BlackQueen => _blackQueen ?? (_blackQueen = LoadBitmapImage("BlackQueen.png"));
 
-    private static Image LoadIcon(string icon)
-    {
-        return new Image()
-        {
-            Source = BitmapImage(icon),
-            Width = 40,
-            Height = 40
-        };
-    }
-
-    private static Image LoadPiece(string piece)
-    {
-        return new Image()
-        {
-            Source = BitmapImage(piece),
-            Width = 55,
-            Height = 55
-        };
-    }
-
-    private static BitmapImage BitmapImage(string file)
+    private static BitmapImage LoadBitmapImage(string image)
     {
         BitmapImage bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
-        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", file));
+        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", image));
         bitmapImage.EndInit();
         return bitmapImage;
     }
+
+    private static BitmapImage? _restartIcon = null;
+    private static BitmapImage? _minimizeIcon = null;
+    private static BitmapImage? _quitIcon = null;
+    private static BitmapImage? _whitePawn = null;
+    private static BitmapImage? _whiteKnight = null;
+    private static BitmapImage? _whiteBishop = null;
+    private static BitmapImage? _whiteKing = null;
+    private static BitmapImage? _whiteRook = null;
+    private static BitmapImage? _whiteQueen = null;
+    private static BitmapImage? _blackPawn = null;
+    private static BitmapImage? _blackKnight = null;
+    private static BitmapImage? _blackBishop = null;
+    private static BitmapImage? _blackKing = null;
+    private static BitmapImage? _blackRook = null;
+    private static BitmapImage? _blackQueen = null;
 }

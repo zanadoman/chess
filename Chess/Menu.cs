@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Chess;
 
@@ -81,13 +82,18 @@ public class Menu : DockPanel
         }
     }
 
-    private Button NewButton(Image image, RoutedEventHandler routedEventHandler)
+    private Button NewButton(BitmapImage image, RoutedEventHandler routedEventHandler)
     {
         Button button = new Button()
         {
             Width = 40,
             Height = 40,
-            Content = image,
+            Content = new Image()
+            {
+                Source = image,
+                Width = 40,
+                Height = 40
+            },
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0)
         };
