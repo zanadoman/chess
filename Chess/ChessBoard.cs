@@ -14,9 +14,6 @@ namespace Chess;
 
 public class ChessBoard : Grid
 {
-    private readonly SolidColorBrush LIGHT_TILE = new SolidColorBrush(Color.FromRgb(227, 193, 111));
-    private readonly SolidColorBrush DARK_TILE = new SolidColorBrush(Color.FromRgb(184, 139, 74));
-
     public ChessBoard()
     {
         Width = Application.Current.MainWindow.Width;
@@ -32,11 +29,11 @@ public class ChessBoard : Grid
             {
                 Button button = new Button();
                 button.Background = ((int)rank + (int)file) % 2 == 0
-                    ? DARK_TILE
-                    : LIGHT_TILE;
+                    ? Brushes.Sienna
+                    : Brushes.Wheat;
                 button.BorderBrush = Brushes.White;
                 button.BorderThickness = new Thickness(0);
-                button.Content = new Image()
+                button.Content = new Image
                 {
                     Width = 55,
                     Height = 55
@@ -52,7 +49,7 @@ public class ChessBoard : Grid
                 UpdateSquare(square);
             }
         }
-        MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
+        MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
     public void Restart()
@@ -75,21 +72,27 @@ public class ChessBoard : Grid
 
     private void OnMouseEnter(object button, MouseEventArgs _)
     {
+        Square square = _squares.Where(s => s.Value == button).Select(s => s.Key).First();
         if (_selectedSquare == null)
         {
-            return;
+            if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
+            {
+                ((Button)button).BorderThickness = new Thickness(3);
+            }
         }
-        Square square = _squares.Where(s => s.Value == button).Select(s => s.Key).First();
-        Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn());
-        if (_gameBoard.IsValidMove(move))
+        else
         {
-            ((Button)button).BorderThickness = new Thickness(3);
+            Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
+            if (_gameBoard.IsValidMove(move))
+            {
+                ((Button)button).BorderThickness = new Thickness(3);
+            }
         }
     }
 
     private void OnMouseLeave(object button, MouseEventArgs _)
     {
-        if (_selectedSquare != null && button != _squares[_selectedSquare])
+        if (_selectedSquare == null || button != _squares[_selectedSquare])
         {
             ((Button)button).BorderThickness = new Thickness(0);
         }
@@ -117,7 +120,7 @@ public class ChessBoard : Grid
         }
         else
         {
-            Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn());
+            Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
             if (_gameBoard.IsValidMove(move))
             {
                 _gameBoard.MakeMove(move, false);
@@ -136,7 +139,7 @@ public class ChessBoard : Grid
                         UpdateSquare(new Square(File.H, _selectedSquare.Rank));
                     }
                 }
-                MainWindow.Menu.GameState = (_gameBoard.GameState, _gameBoard.WhoseTurn());
+                MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
                 ClearValidMoves();
             }
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
@@ -192,18 +195,14 @@ public class ChessBoard : Grid
 
     private void ShowValidMoves(Square selectedSquare)
     {
-        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        foreach (Square square in _squares.Keys)
         {
-            foreach (File file in Enum.GetValues(typeof(File)))
+            Move move = new Move(selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
+            if (square.Equals(selectedSquare) || _gameBoard.IsValidMove(move))
             {
-                Square square = new Square(file, rank);
-                if (square.Equals(selectedSquare) ||
-                    _gameBoard.IsValidMove(new Move(selectedSquare, square, _gameBoard.WhoseTurn())))
-                {
-                    _squares[square].Background = ((int)square.Rank + (int)square.File) % 2 == 0
-                        ? Brushes.DimGray
-                        : Brushes.AntiqueWhite;
-                }
+                _squares[square].Background = ((int)square.Rank + (int)square.File) % 2 == 0
+                    ? Brushes.SlateGray
+                    : Brushes.WhiteSmoke;
             }
         }
     }
@@ -213,8 +212,8 @@ public class ChessBoard : Grid
         foreach (KeyValuePair<Square, Button> square in _squares)
         {
             square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
-                ? DARK_TILE
-                : LIGHT_TILE;
+                ? Brushes.Sienna
+                : Brushes.Wheat;
         }
     }
 

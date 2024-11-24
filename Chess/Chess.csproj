@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="res\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="res\BlackBishop.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -35,13 +31,13 @@
     <None Update="res\BlackRook.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="res\Minimize.png">
+    <None Update="res\MinimizeButton.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="res\Quit.png">
+    <None Update="res\QuitButton.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="res\Restart.png">
+    <None Update="res\RestartButton.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="res\WhiteBishop.png">

@@ -1,5 +1,5 @@
 ﻿using ChessSharp;
-using System.Security.Cryptography;
+using ChessSharp.Pieces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -28,69 +28,88 @@ public class Menu : DockPanel
         {
             Orientation = Orientation.Horizontal
         };
-        controlButtons.Children.Add(NewButton(Chess.Resources.RestartIcon, (_, _) =>
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
+        {
+            switch (PawnPromotion)
+            {
+                case PawnPromotion.Knight:
+                    PawnPromotion = PawnPromotion.Bishop;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteBishop;
+                    break;
+                case PawnPromotion.Bishop:
+                    PawnPromotion = PawnPromotion.Rook;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteRook;
+                    break;
+                case PawnPromotion.Rook:
+                    PawnPromotion = PawnPromotion.Queen;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteQueen;
+                    break;
+                case PawnPromotion.Queen:
+                    PawnPromotion = PawnPromotion.Knight;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteKnight;
+                    break;
+            }
+        }));
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.RestartButton, (_, _) =>
         {
             MainWindow.ChessBoard.Restart();
         }));
-        controlButtons.Children.Add(NewButton(Chess.Resources.MinimizeIcon, (_, _) =>
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.MinimizeButton, (_, _) =>
         {
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }));
-        controlButtons.Children.Add(NewButton(Chess.Resources.QuitIcon, (_, _) =>
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.QuitButton, (_, _) =>
         {
             Application.Current.Shutdown();
         }));
 
-        SetDock(_label, Dock.Left);
+        SetDock(_stateDisplay, Dock.Left);
         SetDock(controlButtons, Dock.Right);
-        Children.Add(_label);
+        Children.Add(_stateDisplay);
         Children.Add(controlButtons);
     }
 
-    public (GameState, Player) GameState
+    public PawnPromotion PawnPromotion { get; set; } = PawnPromotion.Queen;
+
+    public void UpdateStateDisplay(GameState gameState, Player player)
     {
-        get => _gameState;
-        set
+        switch (gameState)
         {
-            switch (value.Item1)
-            {
-                case ChessSharp.GameState.NotCompleted:
-                    _label.Content = value.Item2 == Player.White
-                        ? "White Turn."
-                        : "Black Turn.";
-                    break;
-                case ChessSharp.GameState.WhiteInCheck:
-                    _label.Content = "White in Check.";
-                    break;
-                case ChessSharp.GameState.BlackInCheck:
-                    _label.Content = "Black in Check.";
-                    break;
-                case ChessSharp.GameState.Draw:
-                    _label.Content = "Draw.";
-                    break;
-                case ChessSharp.GameState.Stalemate:
-                    _label.Content = "Stalemate.";
-                    break;
-                case ChessSharp.GameState.WhiteWinner:
-                    _label.Content = "White Winner.";
-                    break;
-                case ChessSharp.GameState.BlackWinner:
-                    _label.Content = "Black Winner.";
-                    break;
-            }
-            _gameState = value;
+            case GameState.NotCompleted:
+                _stateDisplay.Content = player == Player.White
+                    ? "White Turn."
+                    : "Black Turn.";
+                break;
+            case GameState.WhiteInCheck:
+                _stateDisplay.Content = "White in Check.";
+                break;
+            case GameState.BlackInCheck:
+                _stateDisplay.Content = "Black in Check.";
+                break;
+            case GameState.Draw:
+                _stateDisplay.Content = "Draw.";
+                break;
+            case GameState.Stalemate:
+                _stateDisplay.Content = "Stalemate.";
+                break;
+            case GameState.WhiteWinner:
+                _stateDisplay.Content = "White Winner.";
+                break;
+            case GameState.BlackWinner:
+                _stateDisplay.Content = "Black Winner.";
+                break;
         }
     }
 
-    private Button NewButton(BitmapImage image, RoutedEventHandler routedEventHandler)
+    private Button NewControlButton(BitmapImage bitmapImage, RoutedEventHandler routedEventHandler)
     {
-        Button button = new Button()
+        Button button = new Button
         {
             Width = 40,
             Height = 40,
-            Content = new Image()
+            Content = new Image
             {
-                Source = image,
+                Source = bitmapImage,
                 Width = 40,
                 Height = 40
             },
@@ -101,8 +120,7 @@ public class Menu : DockPanel
         return button;
     }
 
-    private (GameState, Player) _gameState;
-    private Label _label = new Label()
+    private Label _stateDisplay = new Label
     {
         FontSize = 36,
         Foreground = Brushes.White,
