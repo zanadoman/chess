@@ -27,6 +27,14 @@ public class Menu : DockPanel
         {
             Orientation = Orientation.Horizontal
         };
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.BlackPawn, (_, _) =>
+        {
+            MainWindow.ChessBoard.RandomMove();
+        }));
+        controlButtons.Children.Add(new StackPanel
+        {
+            Width = 20
+        });
         controlButtons.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
         {
             switch (WhitePawnPromotion)

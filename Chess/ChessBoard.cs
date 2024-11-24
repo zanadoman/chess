@@ -53,6 +53,42 @@ public class ChessBoard : Grid
         MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
+    public void RandomMove()
+    {
+        List<Move> moves = new List<Move>();
+        foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner == _gameBoard.WhoseTurn()))
+        {
+            foreach (Square destination in _squares.Keys.Where(s => _gameBoard[s] == null || _gameBoard[s].Owner != _gameBoard.WhoseTurn()))
+            {
+                Move move = new Move(source, destination, _gameBoard.WhoseTurn(), PawnPromotion.Queen);
+                if (_gameBoard.IsValidMove(move))
+                {
+                    moves.Add(move);
+                }
+            }
+        }
+        if (moves.Count == 0)
+        {
+            return;
+        }
+        MakeMove(moves
+            .OrderBy(m => _gameBoard[m.Source] is King)
+            .ThenByDescending(m => _dangerousSquares.Contains(m.Source))
+            .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
+            .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
+            .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+            .ThenBy(_ => App.Random.Next())
+            .First(),
+        true);
+        if (_selectedSquare != null)
+        {
+            _squares[_selectedSquare].BorderThickness = new Thickness(0);
+            _selectedSquare = null;
+            ClearValidMoves();
+        }
+        MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
+    }
+
     public void Restart()
     {
         ClearValidMoves();
@@ -115,22 +151,7 @@ public class ChessBoard : Grid
             );
             if (_gameBoard.IsValidMove(move))
             {
-                _gameBoard.MakeMove(move, false);
-                UpdateSquare(_selectedSquare);
-                UpdateSquare(square.Key);
-                if (_gameBoard[square.Key] is King)
-                {
-                    if ((int)_selectedSquare.File - (int)square.Key.File == 2)
-                    {
-                        UpdateSquare(new Square(File.A, _selectedSquare.Rank));
-                        UpdateSquare(new Square(File.D, _selectedSquare.Rank));
-                    }
-                    else if ((int)square.Key.File - (int)_selectedSquare.File == 2)
-                    {
-                        UpdateSquare(new Square(File.F, _selectedSquare.Rank));
-                        UpdateSquare(new Square(File.H, _selectedSquare.Rank));
-                    }
-                }
+                MakeMove(move, true);
                 _squares[_selectedSquare].BorderThickness = new Thickness(0);
                 _selectedSquare = null;
                 square.Value.BorderThickness = new Thickness(0);
@@ -140,15 +161,15 @@ public class ChessBoard : Grid
         }
     }
 
-    private void ShowValidMoves(Square selectedSquare)
+    private void ShowValidMoves(Square source)
     {
         foreach (KeyValuePair<Square, Button> square in _squares)
         {
-            if (square.Key.Equals(selectedSquare))
+            if (square.Key.Equals(source))
             {
                 square.Value.Background = Brushes.MediumPurple;
             }
-            else if (_gameBoard.IsValidMove(new Move(selectedSquare, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
+            else if (_gameBoard.IsValidMove(new Move(source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
             {
                 square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
                     ? Brushes.ForestGreen
@@ -164,6 +185,42 @@ public class ChessBoard : Grid
             square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
                 ? Brushes.Sienna
                 : Brushes.Wheat;
+        }
+    }
+
+    private void MakeMove(Move move, bool isMoveValidated)
+    {
+        UpdateDangerousSquares();
+        _gameBoard.MakeMove(move, isMoveValidated);
+        UpdateSquare(move.Source);
+        UpdateSquare(move.Destination);
+        if (_gameBoard[move.Destination] is King)
+        {
+            if ((int)move.Source.File - (int)move.Destination.File == 2)
+            {
+                UpdateSquare(new Square(File.A, move.Source.Rank));
+                UpdateSquare(new Square(File.D, move.Source.Rank));
+            }
+            else if ((int)move.Destination.File - (int)move.Source.File == 2)
+            {
+                UpdateSquare(new Square(File.F, move.Source.Rank));
+                UpdateSquare(new Square(File.H, move.Source.Rank));
+            }
+        }
+    }
+
+    private void UpdateDangerousSquares()
+    {
+        _dangerousSquares.Clear();
+        foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner == _gameBoard.WhoseTurn()))
+        {
+            foreach (Square destination in _squares.Keys.Where(s => _gameBoard[s] == null || _gameBoard[s].Owner != _gameBoard.WhoseTurn()))
+            {
+                if (_gameBoard.IsValidMove(new Move(source, destination, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
+                {
+                    _dangerousSquares.Add(destination);
+                }
+            }
         }
     }
 
@@ -211,7 +268,37 @@ public class ChessBoard : Grid
         }
     }
 
+    private static int GetPieceValue(Piece piece)
+    {
+        if (piece is Pawn)
+        {
+            return 1;
+        }
+        else if (piece is Knight)
+        {
+            return 3;
+        }
+        else if (piece is Bishop)
+        {
+            return 3;
+        }
+        else if (piece is Rook)
+        {
+            return 5;
+        }
+        else if (piece is Queen)
+        {
+            return 9;
+        }
+        else if (piece is King)
+        {
+            return int.MaxValue;
+        }
+        return 0;
+    }
+
     private GameBoard _gameBoard = new GameBoard();
     private Dictionary<Square, Button> _squares = new Dictionary<Square, Button>();
     private Square? _selectedSquare = null;
+    private List<Square> _dangerousSquares = new List<Square>();
 }
