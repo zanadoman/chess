@@ -72,8 +72,7 @@ public class ChessBoard : Grid
             return;
         }
         MakeMove(moves
-            .OrderBy(m => _gameBoard[m.Source] is King)
-            .ThenByDescending(m => _dangerousSquares.Contains(m.Source))
+            .OrderByDescending(m => _dangerousSquares.Contains(m.Source))
             .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
             .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
             .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
@@ -276,23 +275,19 @@ public class ChessBoard : Grid
         }
         else if (piece is Knight)
         {
-            return 3;
+            return 2;
         }
         else if (piece is Bishop)
         {
-            return 3;
+            return 2;
         }
         else if (piece is Rook)
         {
-            return 5;
+            return 2;
         }
         else if (piece is Queen)
         {
-            return 9;
-        }
-        else if (piece is King)
-        {
-            return int.MaxValue;
+            return 3;
         }
         return 0;
     }
