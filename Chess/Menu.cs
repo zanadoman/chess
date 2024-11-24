@@ -16,15 +16,14 @@ public class Menu : DockPanel
         Height = Application.Current.MainWindow.Height - Application.Current.MainWindow.Width;
         Background = Brushes.Transparent;
         LastChildFill = false;
-        MouseDown += (_, mouse) =>
+        MouseDown += (_, mouseButtonEventArgs) =>
         {
-            if (mouse.ChangedButton == MouseButton.Left)
+            if (mouseButtonEventArgs.ChangedButton == MouseButton.Left)
             {
                 Application.Current.MainWindow.DragMove();
             }
         };
-
-        StackPanel controlButtons = new StackPanel()
+        StackPanel controlButtons = new StackPanel
         {
             Orientation = Orientation.Horizontal
         };
@@ -50,6 +49,10 @@ public class Menu : DockPanel
                     break;
             }
         }));
+        controlButtons.Children.Add(new StackPanel
+        {
+            Width = 20
+        });
         controlButtons.Children.Add(NewControlButton(Chess.Resources.RestartButton, (_, _) =>
         {
             MainWindow.ChessBoard.Restart();
@@ -62,7 +65,6 @@ public class Menu : DockPanel
         {
             Application.Current.Shutdown();
         }));
-
         SetDock(_stateDisplay, Dock.Left);
         SetDock(controlButtons, Dock.Right);
         Children.Add(_stateDisplay);
@@ -107,13 +109,13 @@ public class Menu : DockPanel
         {
             Width = 40,
             Height = 40,
+            Background = Brushes.Transparent,
             Content = new Image
             {
                 Source = bitmapImage,
                 Width = 40,
                 Height = 40
             },
-            Background = Brushes.Transparent,
             BorderThickness = new Thickness(0)
         };
         button.Click += routedEventHandler;
