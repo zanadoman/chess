@@ -29,23 +29,45 @@ public class Menu : DockPanel
         };
         controlButtons.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
         {
-            switch (PawnPromotion)
+            switch (WhitePawnPromotion)
             {
                 case PawnPromotion.Knight:
-                    PawnPromotion = PawnPromotion.Bishop;
+                    WhitePawnPromotion = PawnPromotion.Bishop;
                     ((Image)((Button)button).Content).Source = Chess.Resources.WhiteBishop;
                     break;
                 case PawnPromotion.Bishop:
-                    PawnPromotion = PawnPromotion.Rook;
+                    WhitePawnPromotion = PawnPromotion.Rook;
                     ((Image)((Button)button).Content).Source = Chess.Resources.WhiteRook;
                     break;
                 case PawnPromotion.Rook:
-                    PawnPromotion = PawnPromotion.Queen;
+                    WhitePawnPromotion = PawnPromotion.Queen;
                     ((Image)((Button)button).Content).Source = Chess.Resources.WhiteQueen;
                     break;
                 case PawnPromotion.Queen:
-                    PawnPromotion = PawnPromotion.Knight;
+                    WhitePawnPromotion = PawnPromotion.Knight;
                     ((Image)((Button)button).Content).Source = Chess.Resources.WhiteKnight;
+                    break;
+            }
+        }));
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
+        {
+            switch (BlackPawnPromotion)
+            {
+                case PawnPromotion.Knight:
+                    BlackPawnPromotion = PawnPromotion.Bishop;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackBishop;
+                    break;
+                case PawnPromotion.Bishop:
+                    BlackPawnPromotion = PawnPromotion.Rook;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackRook;
+                    break;
+                case PawnPromotion.Rook:
+                    BlackPawnPromotion = PawnPromotion.Queen;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackQueen;
+                    break;
+                case PawnPromotion.Queen:
+                    BlackPawnPromotion = PawnPromotion.Knight;
+                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackKnight;
                     break;
             }
         }));
@@ -71,7 +93,8 @@ public class Menu : DockPanel
         Children.Add(controlButtons);
     }
 
-    public PawnPromotion PawnPromotion { get; set; } = PawnPromotion.Queen;
+    public PawnPromotion WhitePawnPromotion { get; set; } = PawnPromotion.Queen;
+    public PawnPromotion BlackPawnPromotion { get; set; } = PawnPromotion.Queen;
 
     public void UpdateStateDisplay(GameState gameState, Player player)
     {

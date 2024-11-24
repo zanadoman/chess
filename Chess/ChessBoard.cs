@@ -34,8 +34,8 @@ public class ChessBoard : Grid
                         : Brushes.Wheat,
                     Content = new Image
                     {
-                        Width = 55,
-                        Height = 55
+                        Width = 70,
+                        Height = 70
                     },
                     BorderThickness = new Thickness(0),
                     BorderBrush = Brushes.White
@@ -79,7 +79,7 @@ public class ChessBoard : Grid
                 square.Value.BorderThickness = new Thickness(3);
             }
         }
-        else if (_gameBoard.IsValidMove(new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion)))
+        else if (_gameBoard.IsValidMove(new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
         {
             square.Value.BorderThickness = new Thickness(3);
         }
@@ -109,7 +109,10 @@ public class ChessBoard : Grid
         }
         else if (_selectedSquare != null)
         {
-            Move move = new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
+            Move move = new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), _gameBoard.WhoseTurn() == Player.White
+                ? MainWindow.Menu.WhitePawnPromotion
+                : MainWindow.Menu.BlackPawnPromotion
+            );
             if (_gameBoard.IsValidMove(move))
             {
                 _gameBoard.MakeMove(move, false);
@@ -145,7 +148,7 @@ public class ChessBoard : Grid
             {
                 square.Value.Background = Brushes.MediumPurple;
             }
-            else if (_gameBoard.IsValidMove(new Move(selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion)))
+            else if (_gameBoard.IsValidMove(new Move(selectedSquare, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
             {
                 square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
                     ? Brushes.ForestGreen

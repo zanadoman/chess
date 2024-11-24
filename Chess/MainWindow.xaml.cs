@@ -11,8 +11,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         WindowStyle = WindowStyle.None;
         ResizeMode = ResizeMode.NoResize;
-        Width = 480;
-        Height = 540;
+        Width = 640;
+        Height = 700;
         Title = "Chess";
         Background = Brushes.SaddleBrown;
         Icon = Chess.Resources.WhiteKing;
