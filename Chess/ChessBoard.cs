@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Chess;
 
@@ -17,7 +16,7 @@ public class ChessBoard : Grid
     public ChessBoard()
     {
         Width = Application.Current.MainWindow.Width;
-        Height = Application.Current.MainWindow.Width;
+        Height = Width;
         foreach (Rank _ in Enum.GetValues(typeof(Rank)))
         {
             RowDefinitions.Add(new RowDefinition());
@@ -27,26 +26,28 @@ public class ChessBoard : Grid
         {
             foreach (File file in Enum.GetValues(typeof(File)))
             {
-                Button button = new Button();
-                button.Background = ((int)rank + (int)file) % 2 == 0
-                    ? Brushes.Sienna
-                    : Brushes.Wheat;
-                button.BorderBrush = Brushes.White;
-                button.BorderThickness = new Thickness(0);
-                button.Content = new Image
+                Square square = new Square(file, rank);
+                Button button = new Button
                 {
-                    Width = 55,
-                    Height = 55
+                    Background = ((int)rank + (int)file) % 2 == 0
+                        ? Brushes.Sienna
+                        : Brushes.Wheat,
+                    Content = new Image
+                    {
+                        Width = 55,
+                        Height = 55
+                    },
+                    BorderThickness = new Thickness(0),
+                    BorderBrush = Brushes.White
                 };
                 button.MouseEnter += OnMouseEnter;
                 button.MouseLeave += OnMouseLeave;
                 button.Click += OnClick;
+                _squares.Add(square, button);
+                UpdateSquare(square);
                 SetRow(button, (int)Rank.Eighth - (int)rank);
                 SetColumn(button, (int)file);
                 Children.Add(button);
-                Square square = new Square(file, rank);
-                _squares.Add(square, button);
-                UpdateSquare(square);
             }
         }
         MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
@@ -54,39 +55,33 @@ public class ChessBoard : Grid
 
     public void Restart()
     {
-        _gameBoard = new GameBoard();
+        ClearValidMoves();
         if (_selectedSquare != null)
         {
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
             _selectedSquare = null;
         }
-        ClearValidMoves();
-        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        _gameBoard = new GameBoard();
+        foreach (Square square in _squares.Keys)
         {
-            foreach (File file in Enum.GetValues(typeof(File)))
-            {
-                UpdateSquare(new Square(file, rank));
-            }
+            UpdateSquare(square);
         }
+        MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
     private void OnMouseEnter(object button, MouseEventArgs _)
     {
-        Square square = _squares.Where(s => s.Value == button).Select(s => s.Key).First();
+        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
         if (_selectedSquare == null)
         {
-            if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
+            if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
             {
-                ((Button)button).BorderThickness = new Thickness(3);
+                square.Value.BorderThickness = new Thickness(3);
             }
         }
-        else
+        else if (_gameBoard.IsValidMove(new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion)))
         {
-            Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
-            if (_gameBoard.IsValidMove(move))
-            {
-                ((Button)button).BorderThickness = new Thickness(3);
-            }
+            square.Value.BorderThickness = new Thickness(3);
         }
     }
 
@@ -100,109 +95,61 @@ public class ChessBoard : Grid
 
     private void OnClick(object button, RoutedEventArgs _)
     {
-        Square square = _squares.Where(s => s.Value == button).Select(s => s.Key).First();
-        if (_selectedSquare == null)
+        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
+        if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
         {
-            if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
+            if (_selectedSquare != null)
             {
-                ((Button)button).BorderThickness = new Thickness(3);
-                _selectedSquare = square;
-                ShowValidMoves(_selectedSquare);
+                ClearValidMoves();
+                _squares[_selectedSquare].BorderThickness = new Thickness(0);
             }
-        }
-        else if (_gameBoard[square] != null && _gameBoard[square].Owner == _gameBoard.WhoseTurn())
-        {
-            ClearValidMoves();
-            _squares[_selectedSquare].BorderThickness = new Thickness(0);
-            ((Button)button).BorderThickness = new Thickness(3);
-            _selectedSquare = square;
+            _selectedSquare = square.Key;
+            square.Value.BorderThickness = new Thickness(3);
             ShowValidMoves(_selectedSquare);
         }
-        else
+        else if (_selectedSquare != null)
         {
-            Move move = new Move(_selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
+            Move move = new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
             if (_gameBoard.IsValidMove(move))
             {
                 _gameBoard.MakeMove(move, false);
                 UpdateSquare(_selectedSquare);
-                UpdateSquare(square);
-                if (_gameBoard[square] is King)
+                UpdateSquare(square.Key);
+                if (_gameBoard[square.Key] is King)
                 {
-                    if ((int)_selectedSquare.File - (int)square.File == 2)
+                    if ((int)_selectedSquare.File - (int)square.Key.File == 2)
                     {
                         UpdateSquare(new Square(File.A, _selectedSquare.Rank));
                         UpdateSquare(new Square(File.D, _selectedSquare.Rank));
                     }
-                    else if ((int)square.File - (int)_selectedSquare.File == 2)
+                    else if ((int)square.Key.File - (int)_selectedSquare.File == 2)
                     {
                         UpdateSquare(new Square(File.F, _selectedSquare.Rank));
                         UpdateSquare(new Square(File.H, _selectedSquare.Rank));
                     }
                 }
-                MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
+                _squares[_selectedSquare].BorderThickness = new Thickness(0);
+                _selectedSquare = null;
+                square.Value.BorderThickness = new Thickness(0);
                 ClearValidMoves();
+                MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
             }
-            _squares[_selectedSquare].BorderThickness = new Thickness(0);
-            ((Button)button).BorderThickness = new Thickness(0);
-            _selectedSquare = null;
-        }
-    }
-
-    private void UpdateSquare(Square square)
-    {
-        BitmapImage? bitmapImage = null;
-        if (_gameBoard[square] is Pawn pawn)
-        {
-            bitmapImage = pawn.Owner == Player.White
-                ? Chess.Resources.WhitePawn
-                : Chess.Resources.BlackPawn;
-        }
-        else if (_gameBoard[square] is Knight knight)
-        {
-            bitmapImage = knight.Owner == Player.White
-                ? Chess.Resources.WhiteKnight
-                : Chess.Resources.BlackKnight;
-        }
-        else if (_gameBoard[square] is Bishop bishop)
-        {
-            bitmapImage = bishop.Owner == Player.White
-                ? Chess.Resources.WhiteBishop
-                : Chess.Resources.BlackBishop;
-        }
-        else if (_gameBoard[square] is King king)
-        {
-            bitmapImage = king.Owner == Player.White
-                ? Chess.Resources.WhiteKing
-                : Chess.Resources.BlackKing;
-        }
-        else if (_gameBoard[square] is Rook rook)
-        {
-            bitmapImage = rook.Owner == Player.White
-                ? Chess.Resources.WhiteRook
-                : Chess.Resources.BlackRook;
-        }
-        else if (_gameBoard[square] is Queen queen)
-        {
-            bitmapImage = queen.Owner == Player.White
-                ? Chess.Resources.WhiteQueen
-                : Chess.Resources.BlackQueen;
-        }
-        if (_squares[square].Content is Image image)
-        {
-            image.Source = bitmapImage;
         }
     }
 
     private void ShowValidMoves(Square selectedSquare)
     {
-        foreach (Square square in _squares.Keys)
+        foreach (KeyValuePair<Square, Button> square in _squares)
         {
-            Move move = new Move(selectedSquare, square, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion);
-            if (square.Equals(selectedSquare) || _gameBoard.IsValidMove(move))
+            if (square.Key.Equals(selectedSquare))
             {
-                _squares[square].Background = ((int)square.Rank + (int)square.File) % 2 == 0
-                    ? Brushes.SlateGray
-                    : Brushes.WhiteSmoke;
+                square.Value.Background = Brushes.MediumPurple;
+            }
+            else if (_gameBoard.IsValidMove(new Move(selectedSquare, square.Key, _gameBoard.WhoseTurn(), MainWindow.Menu.PawnPromotion)))
+            {
+                square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
+                    ? Brushes.ForestGreen
+                    : Brushes.LimeGreen;
             }
         }
     }
@@ -214,6 +161,50 @@ public class ChessBoard : Grid
             square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
                 ? Brushes.Sienna
                 : Brushes.Wheat;
+        }
+    }
+
+    private void UpdateSquare(Square square)
+    {
+        if (_gameBoard[square] is Pawn pawn)
+        {
+            ((Image)_squares[square].Content).Source = pawn.Owner == Player.White
+                ? Chess.Resources.WhitePawn
+                : Chess.Resources.BlackPawn;
+        }
+        else if (_gameBoard[square] is Knight knight)
+        {
+            ((Image)_squares[square].Content).Source = knight.Owner == Player.White
+                ? Chess.Resources.WhiteKnight
+                : Chess.Resources.BlackKnight;
+        }
+        else if (_gameBoard[square] is Bishop bishop)
+        {
+            ((Image)_squares[square].Content).Source = bishop.Owner == Player.White
+                ? Chess.Resources.WhiteBishop
+                : Chess.Resources.BlackBishop;
+        }
+        else if (_gameBoard[square] is King king)
+        {
+            ((Image)_squares[square].Content).Source = king.Owner == Player.White
+                ? Chess.Resources.WhiteKing
+                : Chess.Resources.BlackKing;
+        }
+        else if (_gameBoard[square] is Rook rook)
+        {
+            ((Image)_squares[square].Content).Source = rook.Owner == Player.White
+                ? Chess.Resources.WhiteRook
+                : Chess.Resources.BlackRook;
+        }
+        else if (_gameBoard[square] is Queen queen)
+        {
+            ((Image)_squares[square].Content).Source = queen.Owner == Player.White
+                ? Chess.Resources.WhiteQueen
+                : Chess.Resources.BlackQueen;
+        }
+        else
+        {
+            ((Image)_squares[square].Content).Source = null;
         }
     }
 
