@@ -84,12 +84,14 @@ public class ChessBoard : Grid
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
-        else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) < GetPieceValue(_gameBoard[m.Destination])))
+        else if (moves
+            .Where(m => _gameBoard[m.Destination] != null)
+            .Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
         {
             moves = moves
-                .Where(m => GetPieceValue(_gameBoard[m.Source]) < GetPieceValue(_gameBoard[m.Destination]))
-                .OrderBy(m => _gameBoard[m.Source] is King)
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .Where(m => _gameBoard[m.Destination] != null)
+                .Where(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination]))
+                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
                 .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
@@ -97,10 +99,9 @@ public class ChessBoard : Grid
         else
         {
             moves = moves
-                .OrderBy(m => _gameBoard[m.Source] is King)
-                .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenByDescending(m => _gameBoard[m.Source] is Queen ? 0 : GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
