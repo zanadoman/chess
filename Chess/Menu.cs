@@ -27,7 +27,7 @@ public class Menu : DockPanel
         {
             Orientation = Orientation.Horizontal
         };
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.BlackPawn, (_, _) =>
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.DiceButton, (_, _) =>
         {
             MainWindow.ChessBoard.RandomMove();
         }));

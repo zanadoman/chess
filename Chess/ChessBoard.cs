@@ -77,41 +77,30 @@ public class ChessBoard : Grid
                 .Where(m => _dangerousSquares.Contains(m.Source))
                 .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenByDescending(m =>
-                {
-                    return _gameBoard.WhoseTurn() == Player.White
-                        ? m.Source.Rank - m.Destination.Rank
-                        : m.Destination.Rank - m.Source.Rank;
-                })
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenByDescending(m => _gameBoard.WhoseTurn() == Player.White
+                    ? m.Source.Rank - m.Destination.Rank
+                    : m.Destination.Rank - m.Source.Rank)
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
-        else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
+        else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) < GetPieceValue(_gameBoard[m.Destination])))
         {
             moves = moves
-                .Where(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination]))
-                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenBy(_ => App.Random.Next())
-                .ToList();
-        }
-        else if (_squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner != _gameBoard.WhoseTurn()).Count() <= 4)
-        {
-            moves = moves
+                .Where(m => GetPieceValue(_gameBoard[m.Source]) < GetPieceValue(_gameBoard[m.Destination]))
                 .OrderBy(m => _gameBoard[m.Source] is King)
-                .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
         else
         {
             moves = moves
-                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .OrderBy(m => _gameBoard[m.Source] is King)
+                .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
@@ -325,19 +314,15 @@ public class ChessBoard : Grid
         }
         else if (piece is Bishop)
         {
-            return 3;
+            return 2;
         }
         else if (piece is Rook)
         {
-            return 3;
+            return 2;
         }
         else if (piece is Queen)
         {
-            return 4;
-        }
-        else if (piece is King)
-        {
-            return int.MaxValue;
+            return 3;
         }
         return 0;
     }

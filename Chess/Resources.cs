@@ -6,6 +6,7 @@ namespace Chess;
 
 internal static class Resources
 {
+    public static BitmapImage DiceButton => _diceButton ?? (_diceButton = LoadBitmapImage("DiceButton.png"));
     public static BitmapImage RestartButton => _restartButton ?? (_restartButton = LoadBitmapImage("RestartButton.png"));
     public static BitmapImage MinimizeButton => _minimizeButton ?? (_minimizeButton = LoadBitmapImage("MinimizeButton.png"));
     public static BitmapImage QuitButton => _quitButton ?? (_quitButton = LoadBitmapImage("QuitButton.png"));
@@ -31,6 +32,7 @@ internal static class Resources
         return bitmapImage;
     }
 
+    private static BitmapImage? _diceButton = null;
     private static BitmapImage? _restartButton = null;
     private static BitmapImage? _minimizeButton = null;
     private static BitmapImage? _quitButton = null;
