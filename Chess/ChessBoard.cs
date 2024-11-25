@@ -71,14 +71,51 @@ public class ChessBoard : Grid
         {
             return;
         }
-        MakeMove(moves
-            .OrderByDescending(m => _dangerousSquares.Contains(m.Source))
-            .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
-            .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
-            .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-            .ThenBy(_ => App.Random.Next())
-            .First(),
-        true);
+        if (moves.Any(m => _dangerousSquares.Contains(m.Source)))
+        {
+            moves = moves
+                .Where(m => _dangerousSquares.Contains(m.Source))
+                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenByDescending(m =>
+                {
+                    return _gameBoard.WhoseTurn() == Player.White
+                        ? m.Source.Rank - m.Destination.Rank
+                        : m.Destination.Rank - m.Source.Rank;
+                })
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenBy(_ => App.Random.Next())
+                .ToList();
+        }
+        else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
+        {
+            moves = moves
+                .Where(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination]))
+                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenBy(_ => App.Random.Next())
+                .ToList();
+        }
+        else if (_squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner != _gameBoard.WhoseTurn()).Count() <= 4)
+        {
+            moves = moves
+                .OrderBy(m => _gameBoard[m.Source] is King)
+                .ThenByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenBy(_ => App.Random.Next())
+                .ToList();
+        }
+        else
+        {
+            moves = moves
+                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
+                .ThenBy(_ => App.Random.Next())
+                .ToList();
+        }
+        MakeMove(moves.First());
         if (_selectedSquare != null)
         {
             _squares[_selectedSquare].BorderThickness = new Thickness(0);
@@ -150,7 +187,7 @@ public class ChessBoard : Grid
             );
             if (_gameBoard.IsValidMove(move))
             {
-                MakeMove(move, true);
+                MakeMove(move);
                 _squares[_selectedSquare].BorderThickness = new Thickness(0);
                 _selectedSquare = null;
                 square.Value.BorderThickness = new Thickness(0);
@@ -187,10 +224,10 @@ public class ChessBoard : Grid
         }
     }
 
-    private void MakeMove(Move move, bool isMoveValidated)
+    private void MakeMove(Move move)
     {
         UpdateDangerousSquares();
-        _gameBoard.MakeMove(move, isMoveValidated);
+        _gameBoard.MakeMove(move, true);
         UpdateSquare(move.Source);
         UpdateSquare(move.Destination);
         if (_gameBoard[move.Destination] is King)
@@ -213,6 +250,15 @@ public class ChessBoard : Grid
         _dangerousSquares.Clear();
         foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner == _gameBoard.WhoseTurn()))
         {
+            if (_gameBoard[source] is Pawn pawn)
+            {
+                Rank rank = (Rank)(_gameBoard.WhoseTurn() == Player.White
+                    ? Math.Min((int)source.Rank + 1, (int)Rank.Eighth)
+                    : Math.Max((int)source.Rank - 1, (int)Rank.First));
+                _dangerousSquares.Add(new Square((File)Math.Max((int)source.File - 1, (int)File.A), rank));
+                _dangerousSquares.Add(new Square((File)Math.Min((int)source.File + 1, (int)File.H), rank));
+                continue;
+            }
             foreach (Square destination in _squares.Keys.Where(s => _gameBoard[s] == null || _gameBoard[s].Owner != _gameBoard.WhoseTurn()))
             {
                 if (_gameBoard.IsValidMove(new Move(source, destination, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
@@ -279,15 +325,19 @@ public class ChessBoard : Grid
         }
         else if (piece is Bishop)
         {
-            return 2;
+            return 3;
         }
         else if (piece is Rook)
         {
-            return 2;
+            return 3;
         }
         else if (piece is Queen)
         {
-            return 3;
+            return 4;
+        }
+        else if (piece is King)
+        {
+            return int.MaxValue;
         }
         return 0;
     }
