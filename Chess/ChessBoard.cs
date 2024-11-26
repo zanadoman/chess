@@ -53,7 +53,7 @@ public class ChessBoard : Grid
         MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
-    public void RandomMove()
+    public void GenerateMove()
     {
         List<Move> moves = new List<Move>();
         foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner == _gameBoard.WhoseTurn()))
@@ -72,10 +72,10 @@ public class ChessBoard : Grid
             return;
         }
         List<Square> dangerousSquares = GetDangerousSquares(_gameBoard.WhoseTurn());
-        if (moves.Any(m => dangerousSquares.Contains(m.Source)))
+        if (moves.Any(m => dangerousSquares.Contains(m.Source) && _gameBoard[m.Source] is not King))
         {
             moves = moves
-                .Where(m => dangerousSquares.Contains(m.Source))
+                .Where(m => dangerousSquares.Contains(m.Source) && _gameBoard[m.Source] is not King)
                 .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))

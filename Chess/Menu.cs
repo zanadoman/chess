@@ -29,7 +29,7 @@ public class Menu : DockPanel
         };
         controlButtons.Children.Add(NewControlButton(Chess.Resources.DiceButton, (_, _) =>
         {
-            MainWindow.ChessBoard.RandomMove();
+            MainWindow.ChessBoard.GenerateMove();
         }));
         controlButtons.Children.Add(new StackPanel
         {
