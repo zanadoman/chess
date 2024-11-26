@@ -423,11 +423,15 @@ public class ChessBoard : Grid
                 {
                     for (int rank = (int)source.Rank - 1; rank <= (int)source.Rank + 1; rank++)
                     {
-                        if (file < (int)File.A || (int)File.H < file || (File)file == source.File)
+                        if (file < (int)File.A || (int)File.H < file)
                         {
                             continue;
                         }
-                        if (rank < (int)Rank.First || (int)Rank.Eighth < rank || (Rank)rank == source.Rank)
+                        if (rank < (int)Rank.First || (int)Rank.Eighth < rank)
+                        {
+                            continue;
+                        }
+                        if ((File)file == source.File && (Rank)rank == source.Rank)
                         {
                             continue;
                         }
