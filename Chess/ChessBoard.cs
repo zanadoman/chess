@@ -72,10 +72,10 @@ public class ChessBoard : Grid
             return;
         }
         List<Square> dangerousSquares = GetDangerousSquares(_gameBoard.WhoseTurn());
-        if (moves.Any(m => dangerousSquares.Contains(m.Source) && _gameBoard[m.Source] is not King))
+        if (moves.Any(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source])))
         {
             moves = moves
-                .Where(m => dangerousSquares.Contains(m.Source) && _gameBoard[m.Source] is not King)
+                .Where(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source]))
                 .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))

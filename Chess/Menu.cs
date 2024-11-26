@@ -110,26 +110,26 @@ public class Menu : DockPanel
         {
             case GameState.NotCompleted:
                 _stateDisplay.Content = player == Player.White
-                    ? "White Turn."
-                    : "Black Turn.";
+                    ? "White Turn"
+                    : "Black Turn";
                 break;
             case GameState.WhiteInCheck:
-                _stateDisplay.Content = "White in Check.";
+                _stateDisplay.Content = "White in Check";
                 break;
             case GameState.BlackInCheck:
-                _stateDisplay.Content = "Black in Check.";
+                _stateDisplay.Content = "Black in Check";
                 break;
             case GameState.Draw:
-                _stateDisplay.Content = "Draw.";
+                _stateDisplay.Content = "Draw";
                 break;
             case GameState.Stalemate:
-                _stateDisplay.Content = "Stalemate.";
+                _stateDisplay.Content = "Stalemate";
                 break;
             case GameState.WhiteWinner:
-                _stateDisplay.Content = "White Winner.";
+                _stateDisplay.Content = "White Winner";
                 break;
             case GameState.BlackWinner:
-                _stateDisplay.Content = "Black Winner.";
+                _stateDisplay.Content = "Black Winner";
                 break;
         }
     }

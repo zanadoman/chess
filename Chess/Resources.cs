@@ -23,11 +23,11 @@ internal static class Resources
     public static BitmapImage BlackRook => _blackRook ?? (_blackRook = LoadBitmapImage("BlackRook.png"));
     public static BitmapImage BlackQueen => _blackQueen ?? (_blackQueen = LoadBitmapImage("BlackQueen.png"));
 
-    private static BitmapImage LoadBitmapImage(string image)
+    private static BitmapImage LoadBitmapImage(string file)
     {
         BitmapImage bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
-        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", image));
+        bitmapImage.UriSource = new Uri(Path.Combine(Environment.CurrentDirectory, "res", file));
         bitmapImage.EndInit();
         return bitmapImage;
     }

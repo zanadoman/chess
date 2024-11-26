@@ -14,8 +14,8 @@ public partial class MainWindow : Window
         Width = 640;
         Height = 700;
         Title = "Chess";
-        Background = Brushes.SaddleBrown;
         Icon = Chess.Resources.WhiteKing;
+        Background = Brushes.SaddleBrown;
         Content = new StackPanel
         {
             Children = { Menu, ChessBoard }
