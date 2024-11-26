@@ -71,11 +71,12 @@ public class ChessBoard : Grid
         {
             return;
         }
-        if (moves.Any(m => _dangerousSquares.Contains(m.Source)))
+        List<Square> dangerousSquares = GetDangerousSquares(_gameBoard.WhoseTurn());
+        if (moves.Any(m => dangerousSquares.Contains(m.Source)))
         {
             moves = moves
-                .Where(m => _dangerousSquares.Contains(m.Source))
-                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
+                .Where(m => dangerousSquares.Contains(m.Source))
+                .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
                 .ThenByDescending(m => _gameBoard.WhoseTurn() == Player.White
@@ -84,44 +85,46 @@ public class ChessBoard : Grid
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
-        else if (moves
-            .Where(m => _gameBoard[m.Destination] != null)
-            .Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
+        else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
         {
             moves = moves
-                .Where(m => _gameBoard[m.Destination] != null)
                 .Where(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination]))
                 .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
                 .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
+        else if (moves.Any(m => !dangerousSquares.Contains(m.Destination)))
+        {
+            moves = moves
+                .Where(m => !dangerousSquares.Contains(m.Destination))
+                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenBy(_ => App.Random.Next())
+                .ToList();
+        }
         else
         {
             moves = moves
-                .OrderByDescending(m => !_dangerousSquares.Contains(m.Destination))
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenByDescending(m => _gameBoard[m.Source] is Queen ? 0 : GetPieceValue(_gameBoard[m.Source]))
+                .OrderBy(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenBy(_ => App.Random.Next())
                 .ToList();
         }
         MakeMove(moves.First());
-        if (_selectedSquare != null)
+        if (_source != null)
         {
-            _squares[_selectedSquare].BorderThickness = new Thickness(0);
-            _selectedSquare = null;
+            _squares[_source].BorderThickness = new Thickness(0);
+            _source = null;
             ClearValidMoves();
         }
-        MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
     public void Restart()
     {
         ClearValidMoves();
-        if (_selectedSquare != null)
+        if (_source != null)
         {
-            _squares[_selectedSquare].BorderThickness = new Thickness(0);
-            _selectedSquare = null;
+            _squares[_source].BorderThickness = new Thickness(0);
+            _source = null;
         }
         _gameBoard = new GameBoard();
         foreach (Square square in _squares.Keys)
@@ -134,14 +137,14 @@ public class ChessBoard : Grid
     private void OnMouseEnter(object button, MouseEventArgs _)
     {
         KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
-        if (_selectedSquare == null)
+        if (_source == null)
         {
             if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
             {
                 square.Value.BorderThickness = new Thickness(3);
             }
         }
-        else if (_gameBoard.IsValidMove(new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
+        else if (_gameBoard.IsValidMove(new Move(_source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
         {
             square.Value.BorderThickness = new Thickness(3);
         }
@@ -149,7 +152,7 @@ public class ChessBoard : Grid
 
     private void OnMouseLeave(object button, MouseEventArgs _)
     {
-        if (_selectedSquare == null || button != _squares[_selectedSquare])
+        if (_source == null || button != _squares[_source])
         {
             ((Button)button).BorderThickness = new Thickness(0);
         }
@@ -157,47 +160,46 @@ public class ChessBoard : Grid
 
     private void OnClick(object button, RoutedEventArgs _)
     {
-        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
-        if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
+        KeyValuePair<Square, Button> destination = _squares.Where(s => s.Value == button).First();
+        if (_gameBoard[destination.Key] != null && _gameBoard[destination.Key].Owner == _gameBoard.WhoseTurn())
         {
-            if (_selectedSquare != null)
+            if (_source != null)
             {
                 ClearValidMoves();
-                _squares[_selectedSquare].BorderThickness = new Thickness(0);
+                _squares[_source].BorderThickness = new Thickness(0);
             }
-            _selectedSquare = square.Key;
-            square.Value.BorderThickness = new Thickness(3);
-            ShowValidMoves(_selectedSquare);
+            _source = destination.Key;
+            destination.Value.BorderThickness = new Thickness(3);
+            ShowValidMoves(_source);
         }
-        else if (_selectedSquare != null)
+        else if (_source != null)
         {
-            Move move = new Move(_selectedSquare, square.Key, _gameBoard.WhoseTurn(), _gameBoard.WhoseTurn() == Player.White
+            Move move = new Move(_source, destination.Key, _gameBoard.WhoseTurn(), _gameBoard.WhoseTurn() == Player.White
                 ? MainWindow.Menu.WhitePawnPromotion
                 : MainWindow.Menu.BlackPawnPromotion
             );
             if (_gameBoard.IsValidMove(move))
             {
                 MakeMove(move);
-                _squares[_selectedSquare].BorderThickness = new Thickness(0);
-                _selectedSquare = null;
-                square.Value.BorderThickness = new Thickness(0);
+                _squares[_source].BorderThickness = new Thickness(0);
+                _source = null;
+                destination.Value.BorderThickness = new Thickness(0);
                 ClearValidMoves();
-                MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
             }
         }
     }
 
     private void ShowValidMoves(Square source)
     {
-        foreach (KeyValuePair<Square, Button> square in _squares)
+        foreach (KeyValuePair<Square, Button> destination in _squares)
         {
-            if (square.Key.Equals(source))
+            if (destination.Key.Equals(source))
             {
-                square.Value.Background = Brushes.MediumPurple;
+                destination.Value.Background = Brushes.MediumPurple;
             }
-            else if (_gameBoard.IsValidMove(new Move(source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
+            else if (_gameBoard.IsValidMove(new Move(source, destination.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
             {
-                square.Value.Background = ((int)square.Key.Rank + (int)square.Key.File) % 2 == 0
+                destination.Value.Background = ((int)destination.Key.Rank + (int)destination.Key.File) % 2 == 0
                     ? Brushes.ForestGreen
                     : Brushes.LimeGreen;
             }
@@ -216,7 +218,6 @@ public class ChessBoard : Grid
 
     private void MakeMove(Move move)
     {
-        UpdateDangerousSquares();
         _gameBoard.MakeMove(move, true);
         UpdateSquare(move.Source);
         UpdateSquare(move.Destination);
@@ -233,30 +234,165 @@ public class ChessBoard : Grid
                 UpdateSquare(new Square(File.H, move.Source.Rank));
             }
         }
+        MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
-    private void UpdateDangerousSquares()
+    private List<Square> GetDangerousSquares(Player player)
     {
-        _dangerousSquares.Clear();
-        foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner == _gameBoard.WhoseTurn()))
+        List<Square> dangerousSquares = new List<Square>();
+        foreach (Square source in _squares.Keys.Where(s => _gameBoard[s] != null && _gameBoard[s].Owner != player))
         {
-            if (_gameBoard[source] is Pawn pawn)
+            if (_gameBoard[source] is Pawn)
             {
-                Rank rank = (Rank)(_gameBoard.WhoseTurn() == Player.White
-                    ? Math.Min((int)source.Rank + 1, (int)Rank.Eighth)
-                    : Math.Max((int)source.Rank - 1, (int)Rank.First));
-                _dangerousSquares.Add(new Square((File)Math.Max((int)source.File - 1, (int)File.A), rank));
-                _dangerousSquares.Add(new Square((File)Math.Min((int)source.File + 1, (int)File.H), rank));
-                continue;
-            }
-            foreach (Square destination in _squares.Keys.Where(s => _gameBoard[s] == null || _gameBoard[s].Owner != _gameBoard.WhoseTurn()))
-            {
-                if (_gameBoard.IsValidMove(new Move(source, destination, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
+                Rank rank = player == Player.White
+                    ? source.Rank - 1
+                    : source.Rank + 1;
+                if (source.File + 1 <= File.H)
                 {
-                    _dangerousSquares.Add(destination);
+                    dangerousSquares.Add(new Square(source.File + 1, rank));
+                }
+                if (File.A <= source.File - 1)
+                {
+                    dangerousSquares.Add(new Square(source.File - 1, rank));
+                }
+            }
+            if (_gameBoard[source] is Knight)
+            {
+                if (source.File + 2 <= File.H)
+                {
+                    if (source.Rank + 1 <= Rank.Eighth)
+                    {
+                        dangerousSquares.Add(new Square(source.File + 2, source.Rank + 1));
+                    }
+                    if (Rank.First <= source.Rank - 1)
+                    {
+                        dangerousSquares.Add(new Square(source.File + 2, source.Rank - 1));
+                    }
+                }
+                if (File.A <= source.File - 2)
+                {
+                    if (source.Rank + 1 <= Rank.Eighth)
+                    {
+                        dangerousSquares.Add(new Square(source.File - 2, source.Rank + 1));
+                    }
+                    if (Rank.First <= source.Rank - 1)
+                    {
+                        dangerousSquares.Add(new Square(source.File - 2, source.Rank - 1));
+                    }
+                }
+                if (source.Rank + 2 <= Rank.Eighth)
+                {
+                    if (source.File + 1 <= File.H)
+                    {
+                        dangerousSquares.Add(new Square(source.File + 1, source.Rank + 2));
+                    }
+                    if (File.A <= source.File - 1)
+                    {
+                        dangerousSquares.Add(new Square(source.File - 1, source.Rank + 2));
+                    }
+                }
+                if (Rank.First <= source.Rank - 2)
+                {
+                    if (source.File + 1 <= File.H)
+                    {
+                        dangerousSquares.Add(new Square(source.File + 1, source.Rank - 2));
+                    }
+                    if (File.A <= source.File - 1)
+                    {
+                        dangerousSquares.Add(new Square(source.File - 1, source.Rank - 2));
+                    }
+                }
+            }
+            if (_gameBoard[source] is Bishop || _gameBoard[source] is Queen)
+            {
+                for (int file = (int)source.File + 1, rank = (int)source.Rank + 1; file <= (int)File.H && rank <= (int)Rank.Eighth; file++, rank++)
+                {
+                    dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int file = (int)source.File - 1, rank = (int)source.Rank + 1; (int)File.A <= file && rank <= (int)Rank.Eighth; file--, rank++)
+                {
+                    dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int file = (int)source.File + 1, rank = (int)source.Rank - 1; file <= (int)File.H && (int)Rank.First <= rank; file++, rank--)
+                {
+                    dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int file = (int)source.File - 1, rank = (int)source.Rank - 1; (int)File.A <= file && (int)Rank.First <= rank; file--, rank--)
+                {
+                    dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (_gameBoard[source] is Rook || _gameBoard[source] is Queen)
+            {
+                for (int file = (int)source.File + 1; file <= (int)File.H; file++)
+                {
+                    dangerousSquares.Add(new Square((File)file, source.Rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int file = (int)source.File - 1; (int)File.A <= file; file--)
+                {
+                    dangerousSquares.Add(new Square((File)file, source.Rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int rank = (int)source.Rank + 1; rank <= (int)Rank.Eighth; rank++)
+                {
+                    dangerousSquares.Add(new Square(source.File, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+                for (int rank = (int)source.Rank - 1; (int)Rank.First <= rank; rank--)
+                {
+                    dangerousSquares.Add(new Square(source.File, (Rank)rank));
+                    if (_gameBoard[dangerousSquares.Last()] != null)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (_gameBoard[source] is King)
+            {
+                for (int file = (int)source.File - 1; file <= (int)source.File + 1; file++)
+                {
+                    for (int rank = (int)source.Rank - 1; rank <= (int)source.Rank + 1; rank++)
+                    {
+                        if (file < (int)File.A || (int)File.H < file || (File)file == source.File)
+                        {
+                            continue;
+                        }
+                        if (rank < (int)Rank.First || (int)Rank.Eighth < rank || (Rank)rank == source.Rank)
+                        {
+                            continue;
+                        }
+                        dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    }
                 }
             }
         }
+        return dangerousSquares;
     }
 
     private void UpdateSquare(Square square)
@@ -309,27 +445,30 @@ public class ChessBoard : Grid
         {
             return 1;
         }
-        else if (piece is Knight)
+        if (piece is Knight)
         {
             return 2;
         }
-        else if (piece is Bishop)
+        if (piece is Bishop)
         {
             return 2;
         }
-        else if (piece is Rook)
+        if (piece is King)
         {
-            return 2;
+            return 0;
         }
-        else if (piece is Queen)
+        if (piece is Rook)
         {
             return 3;
         }
-        return 0;
+        if (piece is Queen)
+        {
+            return 4;
+        }
+        return -1;
     }
 
     private GameBoard _gameBoard = new GameBoard();
     private Dictionary<Square, Button> _squares = new Dictionary<Square, Button>();
-    private Square? _selectedSquare = null;
-    private List<Square> _dangerousSquares = new List<Square>();
+    private Square? _source = null;
 }
