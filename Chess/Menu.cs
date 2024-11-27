@@ -109,9 +109,7 @@ public class Menu : DockPanel
         switch (gameState)
         {
             case GameState.NotCompleted:
-                _stateDisplay.Content = player == Player.White
-                    ? "White Turn"
-                    : "Black Turn";
+                _stateDisplay.Content = player == Player.White ? "White Turn" : "Black Turn";
                 break;
             case GameState.WhiteInCheck:
                 _stateDisplay.Content = "White in Check";

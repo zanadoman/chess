@@ -29,9 +29,7 @@ public class ChessBoard : Grid
                 Square square = new Square(file, rank);
                 Button button = new Button
                 {
-                    Background = ((int)file + (int)rank) % 2 == 0
-                        ? Brushes.Sienna
-                        : Brushes.Wheat,
+                    Background = ((int)file + (int)rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat,
                     Content = new Image
                     {
                         Width = Width / 9,
@@ -46,7 +44,7 @@ public class ChessBoard : Grid
                 _squares.Add(square, button);
                 UpdateSquare(square);
                 SetColumn(button, (int)file);
-                SetRow(button, (Rank.Eighth - rank));
+                SetRow(button, Rank.Eighth - rank);
                 Children.Add(button);
             }
         }
@@ -71,45 +69,49 @@ public class ChessBoard : Grid
         {
             return;
         }
+        IOrderedEnumerable<Move>? filteredMoves = null;
         List<Square> dangerousSquares = GetDangerousSquares(_gameBoard.WhoseTurn());
         if (moves.Any(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source])))
         {
-            moves = moves
+            filteredMoves = moves
                 .Where(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source]))
                 .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
                 .ThenByDescending(m => _gameBoard.WhoseTurn() == Player.White
                     ? m.Source.Rank - m.Destination.Rank
-                    : m.Destination.Rank - m.Source.Rank)
-                .ThenBy(_ => App.Random.Next())
-                .ToList();
+                    : m.Destination.Rank - m.Source.Rank);
         }
         else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
         {
-            moves = moves
+            filteredMoves = moves
                 .Where(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination]))
                 .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenBy(_ => App.Random.Next())
-                .ToList();
+                .ThenBy(m => GetPieceValue(_gameBoard[m.Source]));
         }
         else if (moves.Any(m => !dangerousSquares.Contains(m.Destination)))
         {
-            moves = moves
+            filteredMoves = moves
                 .Where(m => !dangerousSquares.Contains(m.Destination))
-                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenBy(_ => App.Random.Next())
-                .ToList();
+                .OrderByDescending(m => GetPieceValue(_gameBoard[m.Destination]));
         }
         else
         {
-            moves = moves
-                .OrderBy(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenBy(_ => App.Random.Next())
-                .ToList();
+            filteredMoves = moves.OrderBy(m => GetPieceValue(_gameBoard[m.Source]));
         }
-        MakeMove(moves.First());
+        if (_squares.Keys.Sum(k => _gameBoard[k] == null || _gameBoard[k].Owner == _gameBoard.WhoseTurn() ? 0 : GetPieceValue(_gameBoard[k])) <= 10)
+        {
+            Square king = _squares.Keys.Where(k => _gameBoard[k] is King king && king.Owner != _gameBoard.WhoseTurn()).First();
+            filteredMoves
+                .ThenBy(f => Math.Sqrt(Math.Pow(king.File - f.Destination.File, 2) + Math.Pow(king.Rank - f.Destination.Rank, 2)))
+                .ThenByDescending(f => GetPieceValue(_gameBoard[f.Source]))
+                .ThenByDescending(f => Math.Sqrt(Math.Pow(king.File - f.Source.File, 2) + Math.Pow(king.Rank - f.Source.Rank, 2)));
+        }
+        if (filteredMoves.Count() == 0)
+        {
+            return;
+        }
+        MakeMove(filteredMoves.ThenBy(f => App.Random.Next()).First());
         if (_source != null)
         {
             ClearValidMoves();
@@ -160,28 +162,28 @@ public class ChessBoard : Grid
 
     private void OnClick(object button, RoutedEventArgs _)
     {
-        KeyValuePair<Square, Button> destination = _squares.Where(s => s.Value == button).First();
-        if (_gameBoard[destination.Key] != null && _gameBoard[destination.Key].Owner == _gameBoard.WhoseTurn())
+        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
+        if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
         {
             if (_source != null)
             {
                 ClearValidMoves();
                 _squares[_source].BorderThickness = new Thickness(0);
             }
-            _source = destination.Key;
-            destination.Value.BorderThickness = new Thickness(3);
+            _source = square.Key;
+            square.Value.BorderThickness = new Thickness(3);
             ShowValidMoves(_source);
         }
         else if (_source != null)
         {
-            Move move = new Move(_source, destination.Key, _gameBoard.WhoseTurn(), _gameBoard.WhoseTurn() == Player.White
+            Move move = new Move(_source, square.Key, _gameBoard.WhoseTurn(), _gameBoard.WhoseTurn() == Player.White
                 ? MainWindow.Menu.WhitePawnPromotion
                 : MainWindow.Menu.BlackPawnPromotion
             );
             if (_gameBoard.IsValidMove(move))
             {
                 MakeMove(move);
-                destination.Value.BorderThickness = new Thickness(0);
+                square.Value.BorderThickness = new Thickness(0);
                 ClearValidMoves();
                 _squares[_source].BorderThickness = new Thickness(0);
                 _source = null;
@@ -210,15 +212,13 @@ public class ChessBoard : Grid
     {
         foreach (KeyValuePair<Square, Button> square in _squares)
         {
-            square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0
-                ? Brushes.Sienna
-                : Brushes.Wheat;
+            square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat;
         }
     }
 
     private void MakeMove(Move move)
     {
-        _gameBoard.MakeMove(move, true);
+        _gameBoard.MakeMove(move, false);
         UpdateSquare(move.Source);
         UpdateSquare(move.Destination);
         if (_gameBoard[move.Destination] is King)
@@ -288,9 +288,7 @@ public class ChessBoard : Grid
         {
             if (_gameBoard[source] is Pawn)
             {
-                Rank rank = player == Player.White
-                    ? source.Rank - 1
-                    : source.Rank + 1;
+                Rank rank = player == Player.White ? source.Rank - 1 : source.Rank + 1;
                 if (source.File + 1 <= File.H)
                 {
                     dangerousSquares.Add(new Square(source.File + 1, rank));
@@ -299,6 +297,7 @@ public class ChessBoard : Grid
                 {
                     dangerousSquares.Add(new Square(source.File - 1, rank));
                 }
+                continue;
             }
             if (_gameBoard[source] is Knight)
             {
@@ -346,6 +345,30 @@ public class ChessBoard : Grid
                         dangerousSquares.Add(new Square(source.File - 1, source.Rank - 2));
                     }
                 }
+                continue;
+            }
+            if (_gameBoard[source] is King)
+            {
+                for (int file = (int)source.File - 1; file <= (int)source.File + 1; file++)
+                {
+                    for (int rank = (int)source.Rank - 1; rank <= (int)source.Rank + 1; rank++)
+                    {
+                        if (file < (int)File.A || (int)File.H < file)
+                        {
+                            continue;
+                        }
+                        if (rank < (int)Rank.First || (int)Rank.Eighth < rank)
+                        {
+                            continue;
+                        }
+                        if ((File)file == source.File && (Rank)rank == source.Rank)
+                        {
+                            continue;
+                        }
+                        dangerousSquares.Add(new Square((File)file, (Rank)rank));
+                    }
+                }
+                continue;
             }
             if (_gameBoard[source] is Bishop || _gameBoard[source] is Queen)
             {
@@ -417,28 +440,6 @@ public class ChessBoard : Grid
                     }
                 }
             }
-            if (_gameBoard[source] is King)
-            {
-                for (int file = (int)source.File - 1; file <= (int)source.File + 1; file++)
-                {
-                    for (int rank = (int)source.Rank - 1; rank <= (int)source.Rank + 1; rank++)
-                    {
-                        if (file < (int)File.A || (int)File.H < file)
-                        {
-                            continue;
-                        }
-                        if (rank < (int)Rank.First || (int)Rank.Eighth < rank)
-                        {
-                            continue;
-                        }
-                        if ((File)file == source.File && (Rank)rank == source.Rank)
-                        {
-                            continue;
-                        }
-                        dangerousSquares.Add(new Square((File)file, (Rank)rank));
-                    }
-                }
-            }
         }
         return dangerousSquares;
     }
@@ -451,11 +452,11 @@ public class ChessBoard : Grid
         }
         if (piece is Knight)
         {
-            return 2;
+            return 3;
         }
         if (piece is Bishop)
         {
-            return 2;
+            return 3;
         }
         if (piece is King)
         {
@@ -463,11 +464,11 @@ public class ChessBoard : Grid
         }
         if (piece is Rook)
         {
-            return 3;
+            return 5;
         }
         if (piece is Queen)
         {
-            return 4;
+            return 9;
         }
         return -1;
     }
