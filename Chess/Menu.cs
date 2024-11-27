@@ -29,7 +29,7 @@ public class Menu : DockPanel
         };
         leftPanel.Children.Add(new StackPanel
         {
-            Width = 10
+            Width = 20
         });
         leftPanel.Children.Add(_stateDisplay);
         StackPanel rightPanel = new StackPanel
@@ -46,7 +46,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 30
         });
         rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
         {
@@ -94,7 +94,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 30
         });
         rightPanel.Children.Add(NewControlButton(Chess.Resources.RestartButton, (_, _) =>
         {
@@ -110,7 +110,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(new StackPanel
         {
-            Width = 10
+            Width = 20
         });
         SetDock(leftPanel, Dock.Left);
         SetDock(rightPanel, Dock.Right);
@@ -153,14 +153,14 @@ public class Menu : DockPanel
     {
         Button button = new Button
         {
-            Width = 40,
-            Height = 40,
+            Width = 45,
+            Height = 45,
             Background = Brushes.Transparent,
             Content = new Image
             {
                 Source = bitmapImage,
-                Width = 40,
-                Height = 40
+                Width = 45,
+                Height = 45
             },
             BorderThickness = new Thickness(0)
         };
@@ -171,6 +171,7 @@ public class Menu : DockPanel
     private Label _stateDisplay = new Label
     {
         FontSize = 36,
+        FontWeight = FontWeights.Bold,
         Foreground = Brushes.White,
         VerticalAlignment = VerticalAlignment.Center
     };

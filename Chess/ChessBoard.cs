@@ -60,8 +60,8 @@ public class ChessBoard : Grid
                     Background = ((int)file + (int)rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat,
                     Content = new Image
                     {
-                        Width = Width / 10,
-                        Height = Height / 10
+                        Width = Width / 11,
+                        Height = Height / 11
                     },
                     BorderThickness = new Thickness(0),
                     BorderBrush = Brushes.White
@@ -120,10 +120,7 @@ public class ChessBoard : Grid
                 .Where(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source]))
                 .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
-                .ThenByDescending(m => _gameBoard.WhoseTurn() == Player.White
-                    ? m.Source.Rank - m.Destination.Rank
-                    : m.Destination.Rank - m.Source.Rank);
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]));
         }
         else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
         {

@@ -12,7 +12,7 @@ public partial class MainWindow : Window
         WindowStyle = WindowStyle.None;
         ResizeMode = ResizeMode.NoResize;
         Width = 700;
-        Height = 760;
+        Height = 770;
         Title = "Chess";
         Icon = Chess.Resources.WhiteKing;
         Background = new SolidColorBrush(Color.FromRgb(107, 50, 10));
