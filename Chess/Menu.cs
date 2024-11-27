@@ -31,6 +31,10 @@ public class Menu : DockPanel
         {
             MainWindow.ChessBoard.GenerateMove();
         }));
+        controlButtons.Children.Add(NewControlButton(Chess.Resources.DangerButton, (_, _) =>
+        {
+            MainWindow.ChessBoard.ShowDangerousSquares = !MainWindow.ChessBoard.ShowDangerousSquares;
+        }));
         controlButtons.Children.Add(new StackPanel
         {
             Width = 20

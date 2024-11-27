@@ -51,6 +51,21 @@ public class ChessBoard : Grid
         MainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
+    public bool ShowDangerousSquares
+    {
+        get => _showDangerousSquares;
+
+        set
+        {
+            _showDangerousSquares = value;
+            ClearIndicators();
+            if (_source != null)
+            {
+                ShowValidMoves(_source);
+            }
+        }
+    }
+
     public void GenerateMove()
     {
         List<Move> moves = new List<Move>();
@@ -110,15 +125,19 @@ public class ChessBoard : Grid
         MakeMove(filteredMoves.ThenBy(f => App.Random.Next()).First());
         if (_source != null)
         {
-            ClearValidMoves();
+            ClearIndicators();
             _squares[_source].BorderThickness = new Thickness(0);
             _source = null;
+        }
+        else if (_showDangerousSquares)
+        {
+            ClearIndicators();
         }
     }
 
     public void Restart()
     {
-        ClearValidMoves();
+        ClearIndicators();
         if (_source != null)
         {
             _squares[_source].BorderThickness = new Thickness(0);
@@ -163,7 +182,7 @@ public class ChessBoard : Grid
         {
             if (_source != null)
             {
-                ClearValidMoves();
+                ClearIndicators();
                 _squares[_source].BorderThickness = new Thickness(0);
             }
             _source = square.Key;
@@ -180,7 +199,7 @@ public class ChessBoard : Grid
             {
                 MakeMove(move);
                 square.Value.BorderThickness = new Thickness(0);
-                ClearValidMoves();
+                ClearIndicators();
                 _squares[_source].BorderThickness = new Thickness(0);
                 _source = null;
             }
@@ -204,11 +223,19 @@ public class ChessBoard : Grid
         }
     }
 
-    private void ClearValidMoves()
+    private void ClearIndicators()
     {
+        List<Square>? dangerousSquares = _showDangerousSquares ? GetDangerousSquares(_gameBoard.WhoseTurn()) : null;
         foreach (KeyValuePair<Square, Button> square in _squares)
         {
-            square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat;
+            if (dangerousSquares != null && dangerousSquares.Contains(square.Key))
+            {
+                square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.OrangeRed : Brushes.Orange;
+            }
+            else
+            {
+                square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat;
+            }
         }
     }
 
@@ -479,4 +506,5 @@ public class ChessBoard : Grid
     private GameBoard _gameBoard = new GameBoard();
     private Dictionary<Square, Button> _squares = new Dictionary<Square, Button>();
     private Square? _source = null;
+    private bool _showDangerousSquares = false;
 }
