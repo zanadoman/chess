@@ -107,10 +107,6 @@ public class ChessBoard : Grid
                 .ThenByDescending(f => GetPieceValue(_gameBoard[f.Source]))
                 .ThenByDescending(f => Math.Sqrt(Math.Pow(king.File - f.Source.File, 2) + Math.Pow(king.Rank - f.Source.Rank, 2)));
         }
-        if (filteredMoves.Count() == 0)
-        {
-            return;
-        }
         MakeMove(filteredMoves.ThenBy(f => App.Random.Next()).First());
         if (_source != null)
         {
@@ -218,7 +214,14 @@ public class ChessBoard : Grid
 
     private void MakeMove(Move move)
     {
-        _gameBoard.MakeMove(move, false);
+        try
+        {
+            _gameBoard.MakeMove(move, true);
+        }
+        catch
+        {
+            return;
+        }
         UpdateSquare(move.Source);
         UpdateSquare(move.Destination);
         if (_gameBoard[move.Destination] is King)
