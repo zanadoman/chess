@@ -12,9 +12,9 @@ public class Menu : DockPanel
 {
     public Menu()
     {
-        Width = Application.Current.MainWindow.Width - 20;
-        Height = Application.Current.MainWindow.Height - Application.Current.MainWindow.Width;
-        Background = Brushes.Transparent;
+        Width = Application.Current.MainWindow.Width;
+        Height = Application.Current.MainWindow.Height - Width;
+        Background = Brushes.Sienna;
         LastChildFill = false;
         MouseDown += (_, mouseButtonEventArgs) =>
         {
@@ -23,23 +23,32 @@ public class Menu : DockPanel
                 Application.Current.MainWindow.DragMove();
             }
         };
-        StackPanel controlButtons = new StackPanel
+        StackPanel leftPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal
         };
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.DiceButton, (_, _) =>
+        leftPanel.Children.Add(new StackPanel
+        {
+            Width = 10
+        });
+        leftPanel.Children.Add(_stateDisplay);
+        StackPanel rightPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal
+        };
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.DiceButton, (_, _) =>
         {
             MainWindow.ChessBoard.GenerateMove();
         }));
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.DangerButton, (_, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.DangerButton, (_, _) =>
         {
             MainWindow.ChessBoard.ShowDangerousSquares = !MainWindow.ChessBoard.ShowDangerousSquares;
         }));
-        controlButtons.Children.Add(new StackPanel
+        rightPanel.Children.Add(new StackPanel
         {
             Width = 20
         });
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
         {
             switch (WhitePawnPromotion)
             {
@@ -61,7 +70,7 @@ public class Menu : DockPanel
                     break;
             }
         }));
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
         {
             switch (BlackPawnPromotion)
             {
@@ -83,26 +92,30 @@ public class Menu : DockPanel
                     break;
             }
         }));
-        controlButtons.Children.Add(new StackPanel
+        rightPanel.Children.Add(new StackPanel
         {
             Width = 20
         });
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.RestartButton, (_, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.RestartButton, (_, _) =>
         {
             MainWindow.ChessBoard.Restart();
         }));
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.MinimizeButton, (_, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.MinimizeButton, (_, _) =>
         {
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }));
-        controlButtons.Children.Add(NewControlButton(Chess.Resources.QuitButton, (_, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.QuitButton, (_, _) =>
         {
             Application.Current.Shutdown();
         }));
-        SetDock(_stateDisplay, Dock.Left);
-        SetDock(controlButtons, Dock.Right);
-        Children.Add(_stateDisplay);
-        Children.Add(controlButtons);
+        rightPanel.Children.Add(new StackPanel
+        {
+            Width = 10
+        });
+        SetDock(leftPanel, Dock.Left);
+        SetDock(rightPanel, Dock.Right);
+        Children.Add(leftPanel);
+        Children.Add(rightPanel);
     }
 
     public PawnPromotion WhitePawnPromotion { get; set; } = PawnPromotion.Queen;
@@ -136,7 +149,7 @@ public class Menu : DockPanel
         }
     }
 
-    private Button NewControlButton(BitmapImage bitmapImage, RoutedEventHandler routedEventHandler)
+    private static Button NewControlButton(BitmapImage bitmapImage, RoutedEventHandler routedEventHandler)
     {
         Button button = new Button
         {

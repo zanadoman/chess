@@ -17,10 +17,38 @@ public class ChessBoard : Grid
     {
         Width = Application.Current.MainWindow.Width;
         Height = Width;
-        foreach (File _ in Enum.GetValues(typeof(File)))
+        for (int i = 0; i < 10; i++)
         {
             ColumnDefinitions.Add(new ColumnDefinition());
             RowDefinitions.Add(new RowDefinition());
+        }
+        foreach (File file in Enum.GetValues(typeof(File)))
+        {
+            Label label = NewIdentifierLabel(Enum.GetName(typeof(File), file));
+            SetColumn(label, 1 + (int)file);
+            SetRow(label, 0);
+            Children.Add(label);
+        }
+        foreach (File file in Enum.GetValues(typeof(File)))
+        {
+            Label label = NewIdentifierLabel(Enum.GetName(typeof(File), file));
+            SetColumn(label, 1 + (int)file);
+            SetRow(label, 9);
+            Children.Add(label);
+        }
+        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        {
+            Label label = NewIdentifierLabel((1 + (int)rank).ToString());
+            SetColumn(label, 0);
+            SetRow(label, 1 + Rank.Eighth - rank);
+            Children.Add(label);
+        }
+        foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+        {
+            Label label = NewIdentifierLabel((1 + (int)rank).ToString());
+            SetColumn(label, 10);
+            SetRow(label, 1 + Rank.Eighth - rank);
+            Children.Add(label);
         }
         foreach (File file in Enum.GetValues(typeof(File)))
         {
@@ -32,8 +60,8 @@ public class ChessBoard : Grid
                     Background = ((int)file + (int)rank) % 2 == 0 ? Brushes.Sienna : Brushes.Wheat,
                     Content = new Image
                     {
-                        Width = Width / 9,
-                        Height = Height / 9
+                        Width = Width / 10,
+                        Height = Height / 10
                     },
                     BorderThickness = new Thickness(0),
                     BorderBrush = Brushes.White
@@ -43,8 +71,8 @@ public class ChessBoard : Grid
                 button.Click += OnClick;
                 _squares.Add(square, button);
                 UpdateSquare(square);
-                SetColumn(button, (int)file);
-                SetRow(button, Rank.Eighth - rank);
+                SetColumn(button, 1 + (int)file);
+                SetRow(button, 1 + Rank.Eighth - rank);
                 Children.Add(button);
             }
         }
@@ -501,6 +529,19 @@ public class ChessBoard : Grid
             return 9;
         }
         return -1;
+    }
+
+    private static Label NewIdentifierLabel(string? content)
+    {
+        return new Label
+        {
+            FontSize = 48,
+            FontWeight = FontWeights.Bold,
+            Foreground = Brushes.BurlyWood,
+            Content = content,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
     }
 
     private GameBoard _gameBoard = new GameBoard();

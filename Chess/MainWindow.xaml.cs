@@ -11,11 +11,11 @@ public partial class MainWindow : Window
         InitializeComponent();
         WindowStyle = WindowStyle.None;
         ResizeMode = ResizeMode.NoResize;
-        Width = 640;
-        Height = 700;
+        Width = 700;
+        Height = 760;
         Title = "Chess";
         Icon = Chess.Resources.WhiteKing;
-        Background = Brushes.SaddleBrown;
+        Background = new SolidColorBrush(Color.FromRgb(107, 50, 10));
         Content = new StackPanel
         {
             Children = { Menu, ChessBoard }
