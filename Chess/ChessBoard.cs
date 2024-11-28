@@ -532,7 +532,7 @@ public class ChessBoard : Grid
     {
         return new Label
         {
-            FontSize = 48,
+            FontSize = 36,
             FontWeight = FontWeights.Bold,
             Foreground = Brushes.BurlyWood,
             Content = content,
