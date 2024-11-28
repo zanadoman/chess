@@ -48,47 +48,47 @@ public class Menu : DockPanel
         {
             Width = 30
         });
-        rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (sender, _) =>
         {
             switch (WhitePawnPromotion)
             {
                 case PawnPromotion.Knight:
                     WhitePawnPromotion = PawnPromotion.Bishop;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteBishop;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.WhiteBishop;
                     break;
                 case PawnPromotion.Bishop:
                     WhitePawnPromotion = PawnPromotion.Rook;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteRook;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.WhiteRook;
                     break;
                 case PawnPromotion.Rook:
                     WhitePawnPromotion = PawnPromotion.Queen;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteQueen;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.WhiteQueen;
                     break;
                 case PawnPromotion.Queen:
                     WhitePawnPromotion = PawnPromotion.Knight;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.WhiteKnight;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.WhiteKnight;
                     break;
             }
         }));
-        rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (sender, _) =>
         {
             switch (BlackPawnPromotion)
             {
                 case PawnPromotion.Knight:
                     BlackPawnPromotion = PawnPromotion.Bishop;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackBishop;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.BlackBishop;
                     break;
                 case PawnPromotion.Bishop:
                     BlackPawnPromotion = PawnPromotion.Rook;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackRook;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.BlackRook;
                     break;
                 case PawnPromotion.Rook:
                     BlackPawnPromotion = PawnPromotion.Queen;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackQueen;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.BlackQueen;
                     break;
                 case PawnPromotion.Queen:
                     BlackPawnPromotion = PawnPromotion.Knight;
-                    ((Image)((Button)button).Content).Source = Chess.Resources.BlackKnight;
+                    ((Image)((Button)sender).Content).Source = Chess.Resources.BlackKnight;
                     break;
             }
         }));
