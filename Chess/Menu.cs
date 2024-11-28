@@ -106,7 +106,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(NewControlButton(Chess.Resources.QuitButton, (_, _) =>
         {
-            Application.Current.Shutdown();
+            Application.Current.MainWindow.Close();
         }));
         rightPanel.Children.Add(new StackPanel
         {
