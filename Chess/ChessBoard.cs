@@ -168,16 +168,16 @@ public class ChessBoard : Grid
 
     public void Restart()
     {
+        _gameBoard = new GameBoard();
+        foreach (Square square in _squares.Keys)
+        {
+            UpdateSquare(square);
+        }
         ClearIndicators();
         if (_source != null)
         {
             _squares[_source].BorderThickness = new Thickness(0);
             _source = null;
-        }
-        _gameBoard = new GameBoard();
-        foreach (Square square in _squares.Keys)
-        {
-            UpdateSquare(square);
         }
         _mainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
