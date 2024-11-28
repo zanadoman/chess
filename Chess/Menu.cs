@@ -29,7 +29,7 @@ public class Menu : DockPanel
         };
         leftPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 15
         });
         leftPanel.Children.Add(_stateDisplay);
         StackPanel rightPanel = new StackPanel
@@ -110,7 +110,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 15
         });
         SetDock(leftPanel, Dock.Left);
         SetDock(rightPanel, Dock.Right);
