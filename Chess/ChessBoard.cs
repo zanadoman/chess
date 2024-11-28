@@ -64,7 +64,7 @@ public class ChessBoard : Grid
                         Height = Height / 11
                     },
                     BorderThickness = new Thickness(0),
-                    BorderBrush = Brushes.White
+                    BorderBrush = Brushes.Black
                 };
                 button.MouseEnter += OnMouseEnter;
                 button.MouseLeave += OnMouseLeave;
@@ -179,16 +179,10 @@ public class ChessBoard : Grid
     private void OnMouseEnter(object button, MouseEventArgs _)
     {
         KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
-        if (_source == null)
+        if ((_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn()) ||
+            (_source != null && _gameBoard.IsValidMove(new Move(_source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen))))
         {
-            if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
-            {
-                square.Value.BorderThickness = new Thickness(3);
-            }
-        }
-        else if (_gameBoard.IsValidMove(new Move(_source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
-        {
-            square.Value.BorderThickness = new Thickness(3);
+            square.Value.BorderThickness = new Thickness(2);
         }
     }
 
@@ -211,7 +205,7 @@ public class ChessBoard : Grid
                 _squares[_source].BorderThickness = new Thickness(0);
             }
             _source = square.Key;
-            square.Value.BorderThickness = new Thickness(3);
+            square.Value.BorderThickness = new Thickness(2);
             ShowValidMoves(_source);
         }
         else if (_source != null)
