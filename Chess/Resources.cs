@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Avalonia.Media.Imaging;
+using System;
 using System.IO;
-using Avalonia.Media.Imaging;
 
 namespace Chess;
 
