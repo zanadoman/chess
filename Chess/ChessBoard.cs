@@ -179,9 +179,9 @@ public class ChessBoard : Grid
         _mainWindow.Menu.UpdateStateDisplay(_gameBoard.GameState, _gameBoard.WhoseTurn());
     }
 
-    private void OnPointerEntered(object? button, PointerEventArgs _)
+    private void OnPointerEntered(object? sender, PointerEventArgs _)
     {
-        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
+        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == sender).First();
         if ((_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn()) ||
             (_source != null && _gameBoard.IsValidMove(new Move(_source, square.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen))))
         {
@@ -190,21 +190,21 @@ public class ChessBoard : Grid
         }
     }
 
-    private void OnPointerExited(object? button, PointerEventArgs _)
+    private void OnPointerExited(object? sender, PointerEventArgs _)
     {
-        if (button is Button)
+        if (sender is Button button)
         {
-            ((Button)button).Cursor = new Cursor(StandardCursorType.Arrow);
+            button.Cursor = new Cursor(StandardCursorType.Arrow);
             if (_source == null || button != _squares[_source])
             {
-                ((Button)button).BorderThickness = new Thickness(0);
+                button.BorderThickness = new Thickness(0);
             }
         }
     }
 
-    private void OnClick(object? button, RoutedEventArgs _)
+    private void OnClick(object? sender, RoutedEventArgs _)
     {
-        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
+        KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == sender).First();
         if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
         {
             if (_source != null)

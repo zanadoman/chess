@@ -50,9 +50,9 @@ public class Menu : DockPanel
         {
             Width = 30
         });
-        rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (sender, _) =>
         {
-            if (button is Button && ((Button)button).Content is Image image)
+            if (sender is Button button && button.Content is Image image)
             {
                 switch (WhitePawnPromotion)
                 {
@@ -75,9 +75,9 @@ public class Menu : DockPanel
                 }
             }
         }));
-        rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
+        rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (sender, _) =>
         {
-            if (button is Button && ((Button)button).Content is Image image)
+            if (sender is Button button && button.Content is Image image)
             {
                 switch (BlackPawnPromotion)
                 {
@@ -172,18 +172,18 @@ public class Menu : DockPanel
                 Cursor = new Cursor(StandardCursorType.Hand)
             }
         };
-        button.PointerEntered += (button, _) =>
+        button.PointerEntered += (sender, _) =>
         {
-            if (button is Button)
+            if (sender is Button button)
             {
-                ((Button)button).Opacity = 0.75;
+                button.Opacity = 0.75;
             }
         };
-        button.PointerExited += (button, _) =>
+        button.PointerExited += (sender, _) =>
         {
-            if (button is Button)
+            if (sender is Button button)
             {
-                ((Button)button).Opacity = 1;
+                button.Opacity = 1;
             }
         };
         button.Click += eventHandler;
