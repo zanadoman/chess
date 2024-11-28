@@ -120,7 +120,10 @@ public class ChessBoard : Grid
                 .Where(m => dangerousSquares.Contains(m.Source) && 1 < GetPieceValue(_gameBoard[m.Source]))
                 .OrderByDescending(m => !dangerousSquares.Contains(m.Destination))
                 .ThenByDescending(m => GetPieceValue(_gameBoard[m.Source]))
-                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]));
+                .ThenByDescending(m => GetPieceValue(_gameBoard[m.Destination]))
+                .ThenByDescending(m => _gameBoard.WhoseTurn() == Player.White
+                    ? m.Source.Rank - m.Destination.Rank
+                    : m.Destination.Rank - m.Source.Rank);
         }
         else if (moves.Any(m => GetPieceValue(_gameBoard[m.Source]) <= GetPieceValue(_gameBoard[m.Destination])))
         {
