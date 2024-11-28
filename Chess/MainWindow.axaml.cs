@@ -12,6 +12,7 @@ public partial class MainWindow : Window
         CanResize = false;
         Width = 700;
         Height = 770;
+        Title = "Chess";
         Icon = new WindowIcon(Chess.Resources.WhiteKing);
         Background = new SolidColorBrush(Color.FromRgb(107, 50, 10));
         Content = new StackPanel

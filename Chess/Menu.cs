@@ -1,5 +1,5 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -168,9 +168,23 @@ public class Menu : DockPanel
             {
                 Source = bitmap,
                 Width = 45,
-                Height = 45
-            },
-            BorderThickness = new Thickness(0)
+                Height = 45,
+                Cursor = new Cursor(StandardCursorType.Hand)
+            }
+        };
+        button.PointerEntered += (button, _) =>
+        {
+            if (button is Button)
+            {
+                ((Button)button).Opacity = 0.75;
+            }
+        };
+        button.PointerExited += (button, _) =>
+        {
+            if (button is Button)
+            {
+                ((Button)button).Opacity = 1;
+            }
         };
         button.Click += eventHandler;
         return button;
