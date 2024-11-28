@@ -72,7 +72,7 @@ public class ChessBoard : Grid
                 };
                 button.PointerEntered += OnPointerEntered;
                 button.PointerExited += OnPointerExited;
-                button.Click += Click;
+                button.Click += OnClick;
                 _squares.Add(square, button);
                 UpdateSquare(square);
                 SetColumn(button, 1 + (int)file);
@@ -198,13 +198,13 @@ public class ChessBoard : Grid
 
     private void OnPointerExited(object? button, PointerEventArgs _)
     {
-        if ((_source == null || button != _squares[_source]) && button is Button b)
+        if ((_source == null || button != _squares[_source]) && button is Button)
         {
-            b.BorderThickness = new Thickness(0);
+            ((Button)button).BorderThickness = new Thickness(0);
         }
     }
 
-    private void Click(object? button, RoutedEventArgs _)
+    private void OnClick(object? button, RoutedEventArgs _)
     {
         KeyValuePair<Square, Button> square = _squares.Where(s => s.Value == button).First();
         if (_gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn())
@@ -310,47 +310,47 @@ public class ChessBoard : Grid
 
     private void UpdateSquare(Square square)
     {
-        if (_squares[square].Content is Image i)
+        if (_squares[square].Content is Image image)
         {
             if (_gameBoard[square] is Pawn pawn)
             {
-                i.Source = pawn.Owner == Player.White
+                image.Source = pawn.Owner == Player.White
                     ? Chess.Resources.WhitePawn
                     : Chess.Resources.BlackPawn;
             }
             else if (_gameBoard[square] is Knight knight)
             {
-                i.Source = knight.Owner == Player.White
+                image.Source = knight.Owner == Player.White
                     ? Chess.Resources.WhiteKnight
                     : Chess.Resources.BlackKnight;
             }
             else if (_gameBoard[square] is Bishop bishop)
             {
-                i.Source = bishop.Owner == Player.White
+                image.Source = bishop.Owner == Player.White
                     ? Chess.Resources.WhiteBishop
                     : Chess.Resources.BlackBishop;
             }
             else if (_gameBoard[square] is King king)
             {
-                i.Source = king.Owner == Player.White
+                image.Source = king.Owner == Player.White
                     ? Chess.Resources.WhiteKing
                     : Chess.Resources.BlackKing;
             }
             else if (_gameBoard[square] is Rook rook)
             {
-                i.Source = rook.Owner == Player.White
+                image.Source = rook.Owner == Player.White
                     ? Chess.Resources.WhiteRook
                     : Chess.Resources.BlackRook;
             }
             else if (_gameBoard[square] is Queen queen)
             {
-                i.Source = queen.Owner == Player.White
+                image.Source = queen.Owner == Player.White
                     ? Chess.Resources.WhiteQueen
                     : Chess.Resources.BlackQueen;
             }
             else
             {
-                i.Source = null;
+                image.Source = null;
             }
         }
     }

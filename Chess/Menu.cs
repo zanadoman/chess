@@ -31,7 +31,7 @@ public class Menu : DockPanel
         };
         leftPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 15
         });
         leftPanel.Children.Add(_stateDisplay);
         StackPanel rightPanel = new StackPanel
@@ -52,50 +52,50 @@ public class Menu : DockPanel
         });
         rightPanel.Children.Add(NewControlButton(Chess.Resources.WhiteQueen, (button, _) =>
         {
-            if (button is Button b && b.Content is Image i)
+            if (button is Button && ((Button)button).Content is Image image)
             {
                 switch (WhitePawnPromotion)
                 {
                     case PawnPromotion.Knight:
                         WhitePawnPromotion = PawnPromotion.Bishop;
-                        i.Source = Chess.Resources.WhiteBishop;
+                        image.Source = Chess.Resources.WhiteBishop;
                         break;
                     case PawnPromotion.Bishop:
                         WhitePawnPromotion = PawnPromotion.Rook;
-                        i.Source = Chess.Resources.WhiteRook;
+                        image.Source = Chess.Resources.WhiteRook;
                         break;
                     case PawnPromotion.Rook:
                         WhitePawnPromotion = PawnPromotion.Queen;
-                        i.Source = Chess.Resources.WhiteQueen;
+                        image.Source = Chess.Resources.WhiteQueen;
                         break;
                     case PawnPromotion.Queen:
                         WhitePawnPromotion = PawnPromotion.Knight;
-                        i.Source = Chess.Resources.WhiteKnight;
+                        image.Source = Chess.Resources.WhiteKnight;
                         break;
                 }
             }
         }));
         rightPanel.Children.Add(NewControlButton(Chess.Resources.BlackQueen, (button, _) =>
         {
-            if (button is Button b && b.Content is Image i)
+            if (button is Button && ((Button)button).Content is Image image)
             {
                 switch (BlackPawnPromotion)
                 {
                     case PawnPromotion.Knight:
                         BlackPawnPromotion = PawnPromotion.Bishop;
-                        i.Source = Chess.Resources.BlackBishop;
+                        image.Source = Chess.Resources.BlackBishop;
                         break;
                     case PawnPromotion.Bishop:
                         BlackPawnPromotion = PawnPromotion.Rook;
-                        i.Source = Chess.Resources.BlackRook;
+                        image.Source = Chess.Resources.BlackRook;
                         break;
                     case PawnPromotion.Rook:
                         BlackPawnPromotion = PawnPromotion.Queen;
-                        i.Source = Chess.Resources.BlackQueen;
+                        image.Source = Chess.Resources.BlackQueen;
                         break;
                     case PawnPromotion.Queen:
                         BlackPawnPromotion = PawnPromotion.Knight;
-                        i.Source = Chess.Resources.BlackKnight;
+                        image.Source = Chess.Resources.BlackKnight;
                         break;
                 }
             }
@@ -118,7 +118,7 @@ public class Menu : DockPanel
         }));
         rightPanel.Children.Add(new StackPanel
         {
-            Width = 20
+            Width = 15
         });
         SetDock(leftPanel, Dock.Left);
         SetDock(rightPanel, Dock.Right);
@@ -157,7 +157,7 @@ public class Menu : DockPanel
         }
     }
 
-    private static Button NewControlButton(Bitmap bitmap, EventHandler<RoutedEventArgs> routedEventHandler)
+    private static Button NewControlButton(Bitmap bitmap, EventHandler<RoutedEventArgs> eventHandler)
     {
         Button button = new Button
         {
@@ -172,7 +172,7 @@ public class Menu : DockPanel
             },
             BorderThickness = new Thickness(0)
         };
-        button.Click += routedEventHandler;
+        button.Click += eventHandler;
         return button;
     }
 
