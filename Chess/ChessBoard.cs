@@ -233,6 +233,7 @@ public class ChessBoard : Grid
 
     private void ShowValidMoves(Square source)
     {
+        List<Square>? dangerousSquares = _showDangerousSquares ? GetDangerousSquares(_gameBoard.WhoseTurn()) : null;
         foreach (KeyValuePair<Square, Button> destination in _squares)
         {
             if (destination.Key.Equals(source))
@@ -241,9 +242,18 @@ public class ChessBoard : Grid
             }
             else if (_gameBoard.IsValidMove(new Move(source, destination.Key, _gameBoard.WhoseTurn(), PawnPromotion.Queen)))
             {
-                destination.Value.Background = ((int)destination.Key.File + (int)destination.Key.Rank) % 2 == 0
-                    ? Brushes.ForestGreen
-                    : Brushes.LimeGreen;
+                if (dangerousSquares != null && dangerousSquares.Contains(destination.Key))
+                {
+                    destination.Value.Background = ((int)destination.Key.File + (int)destination.Key.Rank) % 2 == 0
+                        ? Brushes.Olive
+                        : Brushes.DarkKhaki;
+                }
+                else
+                {
+                    destination.Value.Background = ((int)destination.Key.File + (int)destination.Key.Rank) % 2 == 0
+                        ? Brushes.ForestGreen
+                        : Brushes.LimeGreen;
+                }
             }
         }
     }
@@ -255,7 +265,9 @@ public class ChessBoard : Grid
         {
             if (dangerousSquares != null && dangerousSquares.Contains(square.Key))
             {
-                square.Value.Background = ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.OrangeRed : Brushes.Orange;
+                square.Value.Background = _gameBoard[square.Key] != null && _gameBoard[square.Key].Owner == _gameBoard.WhoseTurn()
+                    ? ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.DarkRed : Brushes.Crimson
+                    : ((int)square.Key.File + (int)square.Key.Rank) % 2 == 0 ? Brushes.OrangeRed : Brushes.Orange;
             }
             else
             {
