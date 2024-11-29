@@ -170,7 +170,7 @@ public class Menu : DockPanel
 
     private Label _stateDisplay = new Label
     {
-        FontSize = 36,
+        FontSize = 30,
         FontWeight = FontWeights.Bold,
         Foreground = Brushes.White,
         VerticalAlignment = VerticalAlignment.Center
